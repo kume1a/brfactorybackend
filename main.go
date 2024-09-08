@@ -1,6 +1,7 @@
 package main
 
 import (
+	"brfactorybackend/internal/config"
 	"log"
 	"net/http"
 	"os"
@@ -15,6 +16,8 @@ func main() {
 	app := pocketbase.New()
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
+		config.CreateCollections(app)
+
 		e.Router.GET("/*", apis.StaticDirectoryHandler(os.DirFS("./public"), false))
 
 		e.Router.Use(middleware.CORSWithConfig(middleware.CORSConfig{
