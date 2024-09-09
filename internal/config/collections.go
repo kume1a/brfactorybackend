@@ -8,15 +8,20 @@ import (
 )
 
 func CreateCollections(app *pocketbase.PocketBase) error {
+	usersCollection, err := app.Dao().FindCollectionByNameOrId("users")
+
+	if err != nil {
+		return err
+	}
 
 	collection := &models.Collection{
 		Name:       "igAccounts",
 		Type:       models.CollectionTypeBase,
-		ListRule:   nil,
-		ViewRule:   nil,
-		CreateRule: nil,
-		UpdateRule: nil,
-		DeleteRule: nil,
+		ListRule:   types.Pointer(""),
+		ViewRule:   types.Pointer(""),
+		CreateRule: types.Pointer(""),
+		UpdateRule: types.Pointer(""),
+		DeleteRule: types.Pointer(""),
 		Schema: schema.NewSchema(
 			&schema.SchemaField{
 				Name:     "username",
@@ -42,16 +47,16 @@ func CreateCollections(app *pocketbase.PocketBase) error {
 					Max: types.Pointer(255),
 				},
 			},
-			// &schema.SchemaField{
-			// 	Name:     "user",
-			// 	Type:     schema.FieldTypeRelation,
-			// 	Required: true,
-			// 	Options: &schema.RelationOptions{
-			// 		MaxSelect:     types.Pointer(1),
-			// 		CollectionId:  "users",
-			// 		CascadeDelete: true,
-			// 	},
-			// },
+			&schema.SchemaField{
+				Name:     "user",
+				Type:     schema.FieldTypeRelation,
+				Required: true,
+				Options: &schema.RelationOptions{
+					MaxSelect:     types.Pointer(1),
+					CollectionId:  usersCollection.Id,
+					CascadeDelete: true,
+				},
+			},
 		),
 	}
 
