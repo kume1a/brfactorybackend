@@ -100,6 +100,26 @@ func CreateCollections(app *pocketbase.PocketBase) error {
 				},
 			},
 			&schema.SchemaField{
+				Name:     "thumbnail",
+				Type:     schema.FieldTypeFile,
+				Required: true,
+				Options: &schema.FileOptions{
+					MaxSelect: 1,
+					MaxSize:   10 * 1024 * 1024, // 10 MB
+					MimeTypes: []string{"image/jpeg", "image/png"},
+				},
+			},
+			&schema.SchemaField{
+				Name:     "video",
+				Type:     schema.FieldTypeFile,
+				Required: true,
+				Options: &schema.FileOptions{
+					MaxSelect: 1,
+					MaxSize:   100 * 1024 * 1024, // 100 MB
+					MimeTypes: []string{"video/mp4"},
+				},
+			},
+			&schema.SchemaField{
 				Name:     "igAccount",
 				Type:     schema.FieldTypeRelation,
 				Required: true,
