@@ -60,6 +60,10 @@ func CreateCollections(app *pocketbase.PocketBase) error {
 		),
 	}
 
+	if err := app.Dao().SaveCollection(igAccountsCollection); err != nil {
+		return err
+	}
+
 	scheduledIGReelsCollection := &models.Collection{
 		Name:       "scheduledIGReels",
 		Type:       models.CollectionTypeBase,
@@ -130,10 +134,6 @@ func CreateCollections(app *pocketbase.PocketBase) error {
 				},
 			},
 		),
-	}
-
-	if err := app.Dao().SaveCollection(igAccountsCollection); err != nil {
-		return err
 	}
 
 	if err := app.Dao().SaveCollection(scheduledIGReelsCollection); err != nil {
