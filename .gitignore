@@ -2,3 +2,6 @@ public
 pb_data
 vendor
 tmp
+
+.env*
+!.env.example

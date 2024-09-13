@@ -3,6 +3,8 @@ module brfactorybackend
 go 1.22.0
 
 require (
+	github.com/go-resty/resty/v2 v2.14.0
+	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v5 v5.0.0-20230722203903-ec5b858dab61
 	github.com/pocketbase/pocketbase v0.22.20
 	github.com/robfig/cron v1.2.0
