@@ -1,6 +1,8 @@
 package config
 
 import (
+	"brfactorybackend/internal/shared"
+
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/models"
 	"github.com/pocketbase/pocketbase/models/schema"
@@ -8,14 +10,15 @@ import (
 )
 
 func CreateCollections(app *pocketbase.PocketBase) error {
-	usersCollection, err := app.Dao().FindCollectionByNameOrId("users")
+	dao := app.Dao()
 
+	usersCollection, err := app.Dao().FindCollectionByNameOrId(shared.CollectionUsers)
 	if err != nil {
 		return err
 	}
 
 	igAccountsCollection := &models.Collection{
-		Name:       "igAccounts",
+		Name:       shared.CollectionIGAccounts,
 		Type:       models.CollectionTypeBase,
 		ListRule:   types.Pointer(""),
 		ViewRule:   types.Pointer(""),
@@ -48,6 +51,14 @@ func CreateCollections(app *pocketbase.PocketBase) error {
 				},
 			},
 			&schema.SchemaField{
+				Name:     "igSessionId",
+				Type:     schema.FieldTypeText,
+				Required: false,
+				Options: &schema.TextOptions{
+					Max: types.Pointer(4095),
+				},
+			},
+			&schema.SchemaField{
 				Name:     "user",
 				Type:     schema.FieldTypeRelation,
 				Required: true,
@@ -60,12 +71,12 @@ func CreateCollections(app *pocketbase.PocketBase) error {
 		),
 	}
 
-	if err := app.Dao().SaveCollection(igAccountsCollection); err != nil {
+	if err := dao.SaveCollection(igAccountsCollection); err != nil {
 		return err
 	}
 
 	scheduledIGReelsCollection := &models.Collection{
-		Name:       "scheduledIGReels",
+		Name:       shared.CollectionScheduledIGReels,
 		Type:       models.CollectionTypeBase,
 		ListRule:   types.Pointer(""),
 		ViewRule:   types.Pointer(""),
@@ -136,7 +147,48 @@ func CreateCollections(app *pocketbase.PocketBase) error {
 		),
 	}
 
-	if err := app.Dao().SaveCollection(scheduledIGReelsCollection); err != nil {
+	if err := dao.SaveCollection(scheduledIGReelsCollection); err != nil {
+		return err
+	}
+
+	scheduledIGReelUploadsCollection := &models.Collection{
+		Name:       shared.CollectionScheduledIGReelUploads,
+		Type:       models.CollectionTypeBase,
+		ListRule:   types.Pointer(""),
+		ViewRule:   types.Pointer(""),
+		CreateRule: types.Pointer(""),
+		UpdateRule: types.Pointer(""),
+		DeleteRule: types.Pointer(""),
+		Schema: schema.NewSchema(
+			&schema.SchemaField{
+				Name:     "success",
+				Type:     schema.FieldTypeBool,
+				Required: true,
+			},
+			&schema.SchemaField{
+				Name:     "igAccount",
+				Type:     schema.FieldTypeRelation,
+				Required: true,
+				Options: &schema.RelationOptions{
+					MaxSelect:     types.Pointer(1),
+					CollectionId:  igAccountsCollection.Id,
+					CascadeDelete: true,
+				},
+			},
+			&schema.SchemaField{
+				Name:     "scheduledIGReel",
+				Type:     schema.FieldTypeRelation,
+				Required: true,
+				Options: &schema.RelationOptions{
+					MaxSelect:     types.Pointer(1),
+					CollectionId:  scheduledIGReelsCollection.Id,
+					CascadeDelete: true,
+				},
+			},
+		),
+	}
+
+	if err := dao.SaveCollection(scheduledIGReelUploadsCollection); err != nil {
 		return err
 	}
 
