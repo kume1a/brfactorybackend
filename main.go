@@ -2,7 +2,6 @@ package main
 
 import (
 	"brfactorybackend/internal/config"
-	"brfactorybackend/internal/shared"
 	"log"
 	"net/http"
 	"os"
@@ -11,10 +10,14 @@ import (
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
-	"github.com/robfig/cron"
 )
 
 func main() {
+	err := config.LoadEnv()
+	if err != nil {
+		log.Fatal("Couldn't load env vars, returning")
+	}
+
 	app := pocketbase.New()
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
@@ -28,22 +31,7 @@ func main() {
 			AllowHeaders: []string{"Content-Type", "Authorization"},
 		}))
 
-		scheduler := cron.New()
-
-		scheduler.AddFunc("*/10 * * * *", func() {
-			log.Println("Sending email")
-			err := shared.SendEmail(app, shared.SendEmailArgs{
-				ToEmail: "kumela011@gmail.com",
-				Subject: "Alert",
-				Text:    "Hello",
-			})
-
-			if err != nil {
-				log.Println("Error sending an email, ", err)
-			}
-		})
-
-		scheduler.Start()
+		config.SetupCronJobs(app)
 
 		return nil
 	})
