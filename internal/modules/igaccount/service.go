@@ -17,8 +17,7 @@ func GetAllIGAccounts(app *pocketbase.PocketBase) ([]IGAccount, error) {
 
 	var mapped []IGAccount
 	for _, record := range records {
-		scheduledIGReel := IGAccountRecordToModel(record)
-		mapped = append(mapped, scheduledIGReel)
+		mapped = append(mapped, IGAccountRecordToModel(record))
 	}
 
 	return mapped, nil

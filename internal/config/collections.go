@@ -85,12 +85,12 @@ func CreateCollections(app *pocketbase.PocketBase) error {
 		DeleteRule: types.Pointer(""),
 		Schema: schema.NewSchema(
 			&schema.SchemaField{
-				Name:     shared.ScheduledIGReels_StartAt,
+				Name:     shared.ScheduledIGReel_StartAt,
 				Type:     schema.FieldTypeDate,
 				Required: true,
 			},
 			&schema.SchemaField{
-				Name:     shared.ScheduledIGReels_IntervalInSeconds,
+				Name:     shared.ScheduledIGReel_IntervalInSeconds,
 				Type:     schema.FieldTypeNumber,
 				Required: true,
 				Options: &schema.NumberOptions{
@@ -99,7 +99,7 @@ func CreateCollections(app *pocketbase.PocketBase) error {
 				},
 			},
 			&schema.SchemaField{
-				Name:     shared.ScheduledIGReels_Title,
+				Name:     shared.ScheduledIGReel_Title,
 				Type:     schema.FieldTypeText,
 				Required: true,
 				Options: &schema.TextOptions{
@@ -107,7 +107,7 @@ func CreateCollections(app *pocketbase.PocketBase) error {
 				},
 			},
 			&schema.SchemaField{
-				Name:     shared.ScheduledIGReels_Caption,
+				Name:     shared.ScheduledIGReel_Caption,
 				Type:     schema.FieldTypeText,
 				Required: true,
 				Options: &schema.TextOptions{
@@ -115,7 +115,7 @@ func CreateCollections(app *pocketbase.PocketBase) error {
 				},
 			},
 			&schema.SchemaField{
-				Name:     shared.ScheduledIGReels_Thumbnail,
+				Name:     shared.ScheduledIGReel_Thumbnail,
 				Type:     schema.FieldTypeFile,
 				Required: true,
 				Options: &schema.FileOptions{
@@ -125,7 +125,7 @@ func CreateCollections(app *pocketbase.PocketBase) error {
 				},
 			},
 			&schema.SchemaField{
-				Name:     shared.ScheduledIGReels_Video,
+				Name:     shared.ScheduledIGReel_Video,
 				Type:     schema.FieldTypeFile,
 				Required: true,
 				Options: &schema.FileOptions{
@@ -135,7 +135,7 @@ func CreateCollections(app *pocketbase.PocketBase) error {
 				},
 			},
 			&schema.SchemaField{
-				Name:     shared.ScheduledIGReels_IGAccount,
+				Name:     shared.ScheduledIGReel_IGAccount,
 				Type:     schema.FieldTypeRelation,
 				Required: true,
 				Options: &schema.RelationOptions{
@@ -161,12 +161,28 @@ func CreateCollections(app *pocketbase.PocketBase) error {
 		DeleteRule: types.Pointer(""),
 		Schema: schema.NewSchema(
 			&schema.SchemaField{
-				Name:     shared.ScheduledIGReelUploads_Success,
+				Name:     shared.ScheduledIGReelUpload_Success,
 				Type:     schema.FieldTypeBool,
 				Required: true,
 			},
 			&schema.SchemaField{
-				Name:     shared.ScheduledIGReelUploads_IGAccount,
+				Name:     shared.ScheduledIGReelUpload_Title,
+				Type:     schema.FieldTypeText,
+				Required: true,
+				Options: &schema.TextOptions{
+					Max: types.Pointer(255),
+				},
+			},
+			&schema.SchemaField{
+				Name:     shared.ScheduledIGReelUpload_Caption,
+				Type:     schema.FieldTypeText,
+				Required: true,
+				Options: &schema.TextOptions{
+					Max: types.Pointer(65535),
+				},
+			},
+			&schema.SchemaField{
+				Name:     shared.ScheduledIGReelUpload_IGAccount,
 				Type:     schema.FieldTypeRelation,
 				Required: true,
 				Options: &schema.RelationOptions{
@@ -176,7 +192,7 @@ func CreateCollections(app *pocketbase.PocketBase) error {
 				},
 			},
 			&schema.SchemaField{
-				Name:     shared.ScheduledIGReelUploads_ScheduledIGReel,
+				Name:     shared.ScheduledIGReelUpload_ScheduledIGReel,
 				Type:     schema.FieldTypeRelation,
 				Required: true,
 				Options: &schema.RelationOptions{

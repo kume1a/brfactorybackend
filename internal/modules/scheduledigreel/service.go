@@ -9,16 +9,15 @@ import (
 func GetAllScheduledIGReels(app *pocketbase.PocketBase) ([]ScheduledIGReel, error) {
 	dao := app.Dao()
 
-	scheduledIGReels, err := dao.FindRecordsByExpr(shared.CollectionScheduledIGReels, nil)
+	records, err := dao.FindRecordsByExpr(shared.CollectionScheduledIGReels, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	var records []ScheduledIGReel
-	for _, record := range scheduledIGReels {
-		scheduledIGReel := ScheduledIGReelRecordToModel(record)
-		records = append(records, scheduledIGReel)
+	var mapped []ScheduledIGReel
+	for _, record := range records {
+		mapped = append(mapped, ScheduledIGReelRecordToModel(record))
 	}
 
-	return records, nil
+	return mapped, nil
 }

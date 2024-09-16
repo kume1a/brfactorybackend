@@ -13,17 +13,19 @@ const (
 
 	CollectionScheduledIGReels = "scheduledIGReels"
 
-	ScheduledIGReels_StartAt           = "startAt"
-	ScheduledIGReels_IntervalInSeconds = "intervalInSeconds"
-	ScheduledIGReels_Title             = "title"
-	ScheduledIGReels_Caption           = "caption"
-	ScheduledIGReels_Thumbnail         = "thumbnail"
-	ScheduledIGReels_Video             = "video"
-	ScheduledIGReels_IGAccount         = "igAccount"
+	ScheduledIGReel_StartAt           = "startAt"
+	ScheduledIGReel_IntervalInSeconds = "intervalInSeconds"
+	ScheduledIGReel_Title             = "title"
+	ScheduledIGReel_Caption           = "caption"
+	ScheduledIGReel_Thumbnail         = "thumbnail"
+	ScheduledIGReel_Video             = "video"
+	ScheduledIGReel_IGAccount         = "igAccount"
 
 	CollectionScheduledIGReelUploads = "scheduledIGReelUploads"
 
-	ScheduledIGReelUploads_Success         = "success"
-	ScheduledIGReelUploads_IGAccount       = "igAccount"
-	ScheduledIGReelUploads_ScheduledIGReel = "scheduledIGReel"
+	ScheduledIGReelUpload_Success         = "success"
+	ScheduledIGReelUpload_Title           = "title"
+	ScheduledIGReelUpload_Caption         = "caption"
+	ScheduledIGReelUpload_IGAccount       = "igAccount"
+	ScheduledIGReelUpload_ScheduledIGReel = "scheduledIGReel"
 )
