@@ -166,6 +166,15 @@ func CreateCollections(app *pocketbase.PocketBase) error {
 				Required: true,
 			},
 			&schema.SchemaField{
+				Name:     shared.ScheduledIGReelUpload_Index,
+				Type:     schema.FieldTypeNumber,
+				Required: true,
+				Options: &schema.NumberOptions{
+					Min:       types.Pointer(0.0),
+					NoDecimal: true,
+				},
+			},
+			&schema.SchemaField{
 				Name:     shared.ScheduledIGReelUpload_Title,
 				Type:     schema.FieldTypeText,
 				Required: true,

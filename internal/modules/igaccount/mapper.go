@@ -7,19 +7,14 @@ import (
 )
 
 func IGAccountRecordToModel(record *models.Record) IGAccount {
-	id := record.Id
-	username := record.GetString(shared.IGAccount_Username)
-	email := record.GetString(shared.IGAccount_Email)
-	password := record.GetString(shared.IGAccount_Password)
-	igSessionID := record.GetString(shared.IGAccount_IGSessionID)
-	user := record.GetString(shared.IGAccount_User)
-
 	return IGAccount{
-		ID:          id,
-		Username:    username,
-		Email:       email,
-		Password:    password,
-		IGSessionID: igSessionID,
-		User:        user,
+		ID:          record.Id,
+		Created:     record.Created,
+		Updated:     record.Updated,
+		Username:    record.GetString(shared.IGAccount_Username),
+		Email:       record.GetString(shared.IGAccount_Email),
+		Password:    record.GetString(shared.IGAccount_Password),
+		IGSessionID: record.GetString(shared.IGAccount_IGSessionID),
+		User:        record.GetString(shared.IGAccount_User),
 	}
 }

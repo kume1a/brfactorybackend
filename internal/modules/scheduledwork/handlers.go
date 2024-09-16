@@ -4,7 +4,9 @@ import (
 	"brfactorybackend/internal/modules/igaccount"
 	"brfactorybackend/internal/modules/igservice"
 	"brfactorybackend/internal/modules/scheduledigreel"
+	"brfactorybackend/internal/modules/scheduledigreelupload"
 	"log"
+	"time"
 
 	"github.com/pocketbase/pocketbase"
 )
@@ -26,6 +28,20 @@ func ExecuteScheduledIGReels(app *pocketbase.PocketBase) error {
 		igSessionID, err := igaccount.EnsureIGAccountIGSessionID(app, igAccount.ID)
 		if err != nil {
 			return err
+		}
+
+		latestIGReelUpload, err := scheduledigreelupload.GetLatestSuccessScheduledIGReelUpload(
+			app,
+			scheduledIGReel.ID,
+		)
+		if err != nil {
+			return err
+		}
+
+		now := time.Now()
+		diffSinceLastUpload := now.Sub(latestIGReelUpload.Created.Time())
+		if diffSinceLastUpload.Seconds() < float64(scheduledIGReel.IntervalInSecs) {
+			continue
 		}
 
 		if err := igservice.UploadIGTVVideo(igservice.UploadIGTVVideoArgs{

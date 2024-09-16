@@ -24,6 +24,7 @@ const (
 	CollectionScheduledIGReelUploads = "scheduledIGReelUploads"
 
 	ScheduledIGReelUpload_Success         = "success"
+	ScheduledIGReelUpload_Index           = "index"
 	ScheduledIGReelUpload_Title           = "title"
 	ScheduledIGReelUpload_Caption         = "caption"
 	ScheduledIGReelUpload_IGAccount       = "igAccount"

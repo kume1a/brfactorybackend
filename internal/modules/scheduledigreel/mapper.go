@@ -7,23 +7,16 @@ import (
 )
 
 func ScheduledIGReelRecordToModel(record *models.Record) ScheduledIGReel {
-	id := record.Id
-	startAt := record.GetDateTime(shared.ScheduledIGReel_StartAt)
-	intervalInSecs := record.GetInt(shared.ScheduledIGReel_IntervalInSeconds)
-	title := record.GetString(shared.ScheduledIGReel_Title)
-	caption := record.GetString(shared.ScheduledIGReel_Caption)
-	thumbnail := record.GetString(shared.ScheduledIGReel_Thumbnail)
-	video := record.GetString(shared.ScheduledIGReel_Video)
-	igAccount := record.GetString(shared.ScheduledIGReel_IGAccount)
-
 	return ScheduledIGReel{
-		ID:             id,
-		StartAt:        startAt,
-		IntervalInSecs: intervalInSecs,
-		Title:          title,
-		Caption:        caption,
-		Thumbnail:      thumbnail,
-		Video:          video,
-		IGAccount:      igAccount,
+		ID:             record.Id,
+		Created:        record.Created,
+		Updated:        record.Updated,
+		StartAt:        record.GetDateTime(shared.ScheduledIGReel_StartAt),
+		IntervalInSecs: record.GetInt(shared.ScheduledIGReel_IntervalInSeconds),
+		Title:          record.GetString(shared.ScheduledIGReel_Title),
+		Caption:        record.GetString(shared.ScheduledIGReel_Caption),
+		Thumbnail:      record.GetString(shared.ScheduledIGReel_Thumbnail),
+		Video:          record.GetString(shared.ScheduledIGReel_Video),
+		IGAccount:      record.GetString(shared.ScheduledIGReel_IGAccount),
 	}
 }

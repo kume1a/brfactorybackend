@@ -6,6 +6,8 @@ import (
 
 type ScheduledIGReel struct {
 	ID             string         `json:"id"`
+	Created        types.DateTime `json:"created"`
+	Updated        types.DateTime `json:"updated"`
 	StartAt        types.DateTime `json:"startAt"`
 	IntervalInSecs int            `json:"intervalInSeconds"`
 	Title          string         `json:"title"`
