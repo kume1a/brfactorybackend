@@ -2,6 +2,7 @@ package igservice
 
 import (
 	"brfactorybackend/internal/config"
+	"encoding/json"
 	"errors"
 	"log"
 	"strconv"
@@ -10,53 +11,61 @@ import (
 )
 
 type UploadIGTVVideoArgs struct {
-	SessionID    string
-	Title        string
-	Caption      string
-	ThumbnailURL string
-	VideoURL     string
+	SessionID    string `json:"sessionId"`
+	Title        string `json:"title"`
+	Caption      string `json:"caption"`
+	ThumbnailURL string `json:"thumbnailURL"`
+	VideoURL     string `json:"videoURL"`
 }
 
 type GetIGSessionTokenArgs struct {
-	IGUsername string
-	IOPassword string
+	IGUsername string `json:"igUsername"`
+	IOPassword string `json:"igPassword"`
 }
+
 type IGSessionTokenDTO struct {
 	SessionID string `json:"sessionId"`
 }
 
-func UploadIGTVVideo(args UploadIGTVVideoArgs) error {
+type UploadIGTVVideoDTO struct {
+	MediaID string `json:"mediaId"`
+}
+
+func UploadIGTVVideo(args UploadIGTVVideoArgs) (string, error) {
 	envVars, err := config.ParseEnv()
 	if err != nil {
 		log.Println("Couldn't parse env vars, returning")
-		return err
+		return "", err
 	}
 
-	body := `{"sessionId": "` + args.SessionID +
-		`", "videoURL": "` + args.VideoURL +
-		`", "title": "` + args.Title +
-		`", "caption": "` + args.Caption +
-		`", "thumbnailURL": "` + args.ThumbnailURL + `"}`
+	bodyBytes, err := json.Marshal(args)
+	if err != nil {
+		log.Println("Couldn't marshal JSON body, returning")
+		return "", err
+	}
 
 	client := resty.New()
 
 	resp, err := client.R().
-		SetBody(body).
+		SetBody(bodyBytes).
+		SetResult(&UploadIGTVVideoDTO{}).
 		SetHeader("X-Secret", envVars.IGServiceSecret).
 		SetHeader("Content-Type", "application/json").
 		Post(envVars.IGServiceURL + "/uploadIGTVVideo")
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	statusCode := resp.StatusCode()
 	if statusCode > 399 {
 		log.Println("invalid status code " + strconv.Itoa(statusCode) + ", response: " + resp.String())
-		return errors.New("invalid status code " + strconv.Itoa(statusCode))
+		return "", errors.New("invalid status code " + strconv.Itoa(statusCode))
 	}
 
-	return nil
+	res := resp.Result().(*UploadIGTVVideoDTO)
+
+	return res.MediaID, nil
 }
 
 func GetIGSessionID(args GetIGSessionTokenArgs) (string, error) {
@@ -66,12 +75,16 @@ func GetIGSessionID(args GetIGSessionTokenArgs) (string, error) {
 		return "", err
 	}
 
-	body := `{"igUsername": "` + args.IGUsername + `", "igPassword": "` + args.IOPassword + `"}`
+	bodyBytes, err := json.Marshal(args)
+	if err != nil {
+		log.Println("Couldn't marshal JSON body, returning")
+		return "", err
+	}
 
 	client := resty.New()
 
 	resp, err := client.R().
-		SetBody(body).
+		SetBody(bodyBytes).
 		SetResult(&IGSessionTokenDTO{}).
 		SetHeader("X-Secret", envVars.IGServiceSecret).
 		SetHeader("Content-Type", "application/json").
@@ -87,7 +100,7 @@ func GetIGSessionID(args GetIGSessionTokenArgs) (string, error) {
 		return "", errors.New("invalid status code " + strconv.Itoa(statusCode))
 	}
 
-	sessionTokenResponse := resp.Result().(*IGSessionTokenDTO)
+	res := resp.Result().(*IGSessionTokenDTO)
 
-	return sessionTokenResponse.SessionID, nil
+	return res.SessionID, nil
 }
