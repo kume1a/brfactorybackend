@@ -10,6 +10,7 @@ type ScheduledIGReelUpload struct {
 	Index           int            `json:"index"`
 	Title           string         `json:"title"`
 	Caption         string         `json:"caption"`
+	IGMediaID       string         `json:"igMediaId"`
 	IGAccount       string         `json:"igAccount"`
 	ScheduledIGReel string         `json:"scheduledIGReel"`
 }

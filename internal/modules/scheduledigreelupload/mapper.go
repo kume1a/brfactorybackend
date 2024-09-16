@@ -16,6 +16,7 @@ func ScheduledIGReelUploadRecordToModel(r *models.Record) ScheduledIGReelUpload 
 		Index:           r.GetInt(shared.ScheduledIGReelUpload_Index),
 		Title:           r.GetString(shared.ScheduledIGReelUpload_Title),
 		Caption:         r.GetString(shared.ScheduledIGReelUpload_Caption),
+		IGMediaID:       r.GetString(shared.ScheduledIGReelUpload_IGMediaID),
 		IGAccount:       r.GetString(shared.ScheduledIGReelUpload_IGAccount),
 		ScheduledIGReel: r.GetString(shared.ScheduledIGReelUpload_ScheduledIGReel),
 	}
@@ -33,6 +34,7 @@ func ScheduledIGReelUploadModelToRecord(app *pocketbase.PocketBase, m ScheduledI
 	record.Set(shared.ScheduledIGReelUpload_Index, m.Index)
 	record.Set(shared.ScheduledIGReelUpload_Title, m.Title)
 	record.Set(shared.ScheduledIGReelUpload_Caption, m.Caption)
+	record.Set(shared.ScheduledIGReelUpload_IGMediaID, m.IGMediaID)
 	record.Set(shared.ScheduledIGReelUpload_IGAccount, m.IGAccount)
 	record.Set(shared.ScheduledIGReelUpload_ScheduledIGReel, m.ScheduledIGReel)
 

@@ -41,10 +41,15 @@ func ExecuteScheduledIGReels(app *pocketbase.PocketBase) error {
 		}
 
 		if latestIGReelUpload != nil {
+			log.Println("latestIGReelUpload is not nil, checking if it's time to upload")
+
 			now := time.Now()
 			diffSinceLastUpload := now.Sub(latestIGReelUpload.Created.Time())
 
+			log.Println("diffSinceLastUpload.Seconds() = ", diffSinceLastUpload.Seconds())
+
 			if diffSinceLastUpload.Seconds() < float64(scheduledIGReel.IntervalInSecs) {
+				log.Println("It's not time to upload yet, skipping")
 				continue
 			}
 		}
@@ -55,6 +60,8 @@ func ExecuteScheduledIGReels(app *pocketbase.PocketBase) error {
 		} else {
 			nextIndex = latestIGReelUpload.Index + 1
 		}
+
+		log.Println("Preparing to upload IGTV video, nextIndex = ", nextIndex)
 
 		videoFileURL, err := scheduledIGReel.VideoFileURL()
 		if err != nil {
@@ -73,7 +80,7 @@ func ExecuteScheduledIGReels(app *pocketbase.PocketBase) error {
 
 		log.Println("Uploading IGTV video, Title = " + title + ", Caption = " + scheduledIGReel.Caption + ", SessionID = " + igSessionID + ", VideoURL = " + videoFileURL + ", ThumbnailURL = " + thumbnailFileURL)
 
-		uploadIGTVVideoErr := igservice.UploadIGTVVideo(igservice.UploadIGTVVideoArgs{
+		igMediaID, uploadIGTVVideoErr := igservice.UploadIGTVVideo(igservice.UploadIGTVVideoArgs{
 			Title:        title,
 			Caption:      scheduledIGReel.Caption,
 			SessionID:    igSessionID,
@@ -89,8 +96,9 @@ func ExecuteScheduledIGReels(app *pocketbase.PocketBase) error {
 			scheduledigreelupload.ScheduledIGReelUpload{
 				Success:         uploadIGTVVideoErr == nil,
 				Index:           nextIndex,
-				Title:           scheduledIGReel.Title,
+				Title:           title,
 				Caption:         scheduledIGReel.Caption,
+				IGMediaID:       igMediaID,
 				IGAccount:       scheduledIGReel.IGAccount,
 				ScheduledIGReel: scheduledIGReel.ID,
 			},

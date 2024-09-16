@@ -191,6 +191,14 @@ func CreateCollections(app *pocketbase.PocketBase) error {
 				},
 			},
 			&schema.SchemaField{
+				Name:     shared.ScheduledIGReelUpload_IGMediaID,
+				Type:     schema.FieldTypeText,
+				Required: false,
+				Options: &schema.TextOptions{
+					Max: types.Pointer(512),
+				},
+			},
+			&schema.SchemaField{
 				Name:     shared.ScheduledIGReelUpload_IGAccount,
 				Type:     schema.FieldTypeRelation,
 				Required: true,

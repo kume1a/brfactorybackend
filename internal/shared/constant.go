@@ -27,6 +27,7 @@ const (
 	ScheduledIGReelUpload_Index           = "index"
 	ScheduledIGReelUpload_Title           = "title"
 	ScheduledIGReelUpload_Caption         = "caption"
+	ScheduledIGReelUpload_IGMediaID       = "igMediaId"
 	ScheduledIGReelUpload_IGAccount       = "igAccount"
 	ScheduledIGReelUpload_ScheduledIGReel = "scheduledIGReel"
 )
