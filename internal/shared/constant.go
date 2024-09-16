@@ -17,8 +17,8 @@ const (
 	ScheduledIGReel_IntervalInSeconds = "intervalInSeconds"
 	ScheduledIGReel_Title             = "title"
 	ScheduledIGReel_Caption           = "caption"
-	ScheduledIGReel_Thumbnail         = "thumbnail"
-	ScheduledIGReel_Video             = "video"
+	ScheduledIGReel_ThumbnailFileID   = "thumbnailFileId"
+	ScheduledIGReel_VideoFileID       = "videoFileId"
 	ScheduledIGReel_IGAccount         = "igAccount"
 
 	CollectionScheduledIGReelUploads = "scheduledIGReelUploads"

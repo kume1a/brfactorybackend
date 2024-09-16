@@ -8,16 +8,16 @@ import (
 )
 
 type ScheduledIGReel struct {
-	ID             string         `json:"id"`
-	Created        types.DateTime `json:"created"`
-	Updated        types.DateTime `json:"updated"`
-	StartAt        types.DateTime `json:"startAt"`
-	IntervalInSecs int            `json:"intervalInSeconds"`
-	Title          string         `json:"title"`
-	Caption        string         `json:"caption"`
-	Thumbnail      string         `json:"thumbnail"`
-	Video          string         `json:"video"`
-	IGAccount      string         `json:"igAccount"`
+	ID              string         `json:"id"`
+	Created         types.DateTime `json:"created"`
+	Updated         types.DateTime `json:"updated"`
+	StartAt         types.DateTime `json:"startAt"`
+	IntervalInSecs  int            `json:"intervalInSeconds"`
+	Title           string         `json:"title"`
+	Caption         string         `json:"caption"`
+	ThumbnailFileID string         `json:"thumbnailFileId"`
+	VideoFileID     string         `json:"videoFileId"`
+	IGAccount       string         `json:"igAccount"`
 }
 
 func (r *ScheduledIGReel) VideoFileURL() (string, error) {
@@ -26,7 +26,7 @@ func (r *ScheduledIGReel) VideoFileURL() (string, error) {
 		return "", err
 	}
 
-	return env.FileURLPrefix + shared.ConstructPBFilePath(shared.CollectionScheduledIGReels, r.ID, r.Video), nil
+	return env.FileURLPrefix + shared.ConstructPBFilePath(shared.CollectionScheduledIGReels, r.ID, r.VideoFileID), nil
 }
 
 func (r *ScheduledIGReel) ThumbnailFileURL() (string, error) {
@@ -35,5 +35,5 @@ func (r *ScheduledIGReel) ThumbnailFileURL() (string, error) {
 		return "", err
 	}
 
-	return env.FileURLPrefix + shared.ConstructPBFilePath(shared.CollectionScheduledIGReels, r.ID, r.Thumbnail), nil
+	return env.FileURLPrefix + shared.ConstructPBFilePath(shared.CollectionScheduledIGReels, r.ID, r.ThumbnailFileID), nil
 }

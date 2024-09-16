@@ -10,7 +10,7 @@ func SetupCronJobs(app *pocketbase.PocketBase) {
 
 	// scheduler.AddFunc("0 */10 * * * *", func() {
 	scheduler.AddFunc("*/30 * * * *", func() {
-		ExecuteScheduledIGReels(app)
+		// ExecuteScheduledIGReels(app)
 	})
 
 	scheduler.Start()

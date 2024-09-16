@@ -115,7 +115,7 @@ func CreateCollections(app *pocketbase.PocketBase) error {
 				},
 			},
 			&schema.SchemaField{
-				Name:     shared.ScheduledIGReel_Thumbnail,
+				Name:     shared.ScheduledIGReel_ThumbnailFileID,
 				Type:     schema.FieldTypeFile,
 				Required: true,
 				Options: &schema.FileOptions{
@@ -125,7 +125,7 @@ func CreateCollections(app *pocketbase.PocketBase) error {
 				},
 			},
 			&schema.SchemaField{
-				Name:     shared.ScheduledIGReel_Video,
+				Name:     shared.ScheduledIGReel_VideoFileID,
 				Type:     schema.FieldTypeFile,
 				Required: true,
 				Options: &schema.FileOptions{
