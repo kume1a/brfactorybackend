@@ -71,6 +71,8 @@ func ExecuteScheduledIGReels(app *pocketbase.PocketBase) error {
 		title := strings.ReplaceAll(scheduledIGReel.Title, "{indexPlusOne}", strconv.Itoa(nextIndex+1))
 		title = strings.ReplaceAll(title, "{index}", strconv.Itoa(nextIndex))
 
+		log.Println("Uploading IGTV video, Title = " + title + ", Caption = " + scheduledIGReel.Caption + ", SessionID = " + igSessionID + ", VideoURL = " + videoFileURL + ", ThumbnailURL = " + thumbnailFileURL)
+
 		uploadIGTVVideoErr := igservice.UploadIGTVVideo(igservice.UploadIGTVVideoArgs{
 			Title:        title,
 			Caption:      scheduledIGReel.Caption,
@@ -79,7 +81,7 @@ func ExecuteScheduledIGReels(app *pocketbase.PocketBase) error {
 			ThumbnailURL: thumbnailFileURL,
 		})
 		if uploadIGTVVideoErr != nil {
-			log.Println("Couldn't upload IG reel, skipping", err)
+			log.Println("Couldn't upload IG reel, ", uploadIGTVVideoErr)
 		}
 
 		if _, err := scheduledigreelupload.CreateScheduledIGReelUpload(

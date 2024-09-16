@@ -11,17 +11,17 @@ import (
 
 type UploadIGTVVideoArgs struct {
 	SessionID    string
-	VideoURL     string
 	Title        string
 	Caption      string
 	ThumbnailURL string
+	VideoURL     string
 }
 
 type GetIGSessionTokenArgs struct {
 	IGUsername string
 	IOPassword string
 }
-type SessionTokenResponse struct {
+type IGSessionTokenDTO struct {
 	SessionID string `json:"sessionId"`
 }
 
@@ -72,7 +72,7 @@ func GetIGSessionID(args GetIGSessionTokenArgs) (string, error) {
 
 	resp, err := client.R().
 		SetBody(body).
-		SetResult(&SessionTokenResponse{}).
+		SetResult(&IGSessionTokenDTO{}).
 		SetHeader("X-Secret", envVars.IGServiceSecret).
 		SetHeader("Content-Type", "application/json").
 		Post(envVars.IGServiceURL + "/getSessionId")
@@ -87,7 +87,7 @@ func GetIGSessionID(args GetIGSessionTokenArgs) (string, error) {
 		return "", errors.New("invalid status code " + strconv.Itoa(statusCode))
 	}
 
-	sessionTokenResponse := resp.Result().(*SessionTokenResponse)
+	sessionTokenResponse := resp.Result().(*IGSessionTokenDTO)
 
 	return sessionTokenResponse.SessionID, nil
 }
