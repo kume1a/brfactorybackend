@@ -1,55 +1,45 @@
-package scheduledigreel
+package scheduledwork
 
 import (
+	"brfactorybackend/internal/modules/igaccount"
+	"brfactorybackend/internal/modules/igservice"
+	"brfactorybackend/internal/modules/scheduledigreel"
 	"log"
 
 	"github.com/pocketbase/pocketbase"
 )
 
 func ExecuteScheduledIGReels(app *pocketbase.PocketBase) error {
-	scheduledIGReels, err := GetAllScheduledIGReels(app)
+	scheduledIGReels, err := scheduledigreel.GetAllScheduledIGReels(app)
 	if err != nil {
 		log.Println("Couldn't find scheduled IG reels, returning", err)
 		return err
 	}
 
+	for _, scheduledIGReel := range scheduledIGReels {
+		igAccount, err := igaccount.GetIGAccountByID(app, scheduledIGReel.IGAccount)
+		if err != nil {
+			log.Println("Couldn't find IG account, skipping", err)
+			continue
+		}
+
+		igSessionID, err := igaccount.EnsureIGAccountIGSessionID(app, igAccount.ID)
+		if err != nil {
+			return err
+		}
+
+		if err := igservice.UploadIGTVVideo(igservice.UploadIGTVVideoArgs{
+			Title:        scheduledIGReel.Title,
+			Caption:      scheduledIGReel.Caption,
+			SessionID:    igSessionID,
+			VideoURL:     "",
+			ThumbnailURL: "",
+		}); err != nil {
+			log.Println("Couldn't upload IG reel, skipping", err)
+			continue
+		}
+	}
 	return nil
-
-	// for _, scheduledIGReel := range scheduledIGReels {
-	// 	igAccountID, ok := scheduledIGReel["igAccountId"].(string)
-	// 	if !ok {
-	// 		log.Println("Couldn't get ig account ID from scheduled IG reel, skipping")
-	// 		continue
-	// 	}
-
-	// 	igAccount, err := dao.FindRecordByID(shared.CollectionIGAccounts, igAccountID)
-	// 	if err != nil {
-	// 		log.Println("Couldn't find IG account, skipping", err)
-	// 		continue
-	// 	}
-
-	// 	igSessionID, ok := igAccount["igSessionId"].(string)
-	// 	if !ok {
-	// 		log.Println("Couldn't get IG session ID from IG account, skipping")
-	// 		continue
-	// 	}
-
-	// 	igReel, ok := scheduledIGReel["igReel"].(map[string]interface{})
-	// 	if !ok {
-	// 		log.Println("Couldn't get IG reel from scheduled IG reel, skipping")
-	// 		continue
-	// 	}
-
-	// 	if err := igservice.UploadIGReel(igservice.UploadIGReelArgs{
-	// 		SessionID: igSessionID,
-	// 		Reel:      igReel,
-	// 	}); err != nil {
-	// 		log.Println("Couldn't upload IG reel, skipping", err)
-	// 		continue
-	// 	}
-
-	// 	log.Println("Successfully uploaded IG reel")
-	// }
 
 	// --------------------------------------------------------------------------------------------------------------
 

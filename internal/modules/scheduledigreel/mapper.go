@@ -1,16 +1,20 @@
 package scheduledigreel
 
-import "github.com/pocketbase/pocketbase/models"
+import (
+	"brfactorybackend/internal/shared"
 
-func mapRecordToStruct(record *models.Record) ScheduledIGReel {
+	"github.com/pocketbase/pocketbase/models"
+)
+
+func ScheduledIGReelRecordToModel(record *models.Record) ScheduledIGReel {
 	id := record.Id
-	startAt := record.GetDateTime("startAt")
-	intervalInSecs := record.GetInt("intervalInSeconds")
-	title := record.GetString("title")
-	caption := record.GetString("caption")
-	thumbnail := record.GetString("thumbnail")
-	video := record.GetString("video")
-	igAccount := record.GetString("igAccount")
+	startAt := record.GetDateTime(shared.ScheduledIGReels_StartAt)
+	intervalInSecs := record.GetInt(shared.ScheduledIGReels_IntervalInSeconds)
+	title := record.GetString(shared.ScheduledIGReels_Title)
+	caption := record.GetString(shared.ScheduledIGReels_Caption)
+	thumbnail := record.GetString(shared.ScheduledIGReels_Thumbnail)
+	video := record.GetString(shared.ScheduledIGReels_Video)
+	igAccount := record.GetString(shared.ScheduledIGReels_IGAccount)
 
 	return ScheduledIGReel{
 		ID:             id,

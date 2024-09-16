@@ -2,6 +2,7 @@ package main
 
 import (
 	"brfactorybackend/internal/config"
+	"brfactorybackend/internal/modules/scheduledwork"
 	"log"
 	"net/http"
 	"os"
@@ -31,7 +32,7 @@ func main() {
 			AllowHeaders: []string{"Content-Type", "Authorization"},
 		}))
 
-		config.SetupCronJobs(app)
+		scheduledwork.SetupCronJobs(app)
 
 		return nil
 	})

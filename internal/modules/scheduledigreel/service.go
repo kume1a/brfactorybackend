@@ -16,7 +16,7 @@ func GetAllScheduledIGReels(app *pocketbase.PocketBase) ([]ScheduledIGReel, erro
 
 	var records []ScheduledIGReel
 	for _, record := range scheduledIGReels {
-		scheduledIGReel := mapRecordToStruct(record)
+		scheduledIGReel := ScheduledIGReelRecordToModel(record)
 		records = append(records, scheduledIGReel)
 	}
 

@@ -27,7 +27,7 @@ func CreateCollections(app *pocketbase.PocketBase) error {
 		DeleteRule: types.Pointer(""),
 		Schema: schema.NewSchema(
 			&schema.SchemaField{
-				Name:     "username",
+				Name:     shared.IGAccount_Username,
 				Type:     schema.FieldTypeText,
 				Required: true,
 				Options: &schema.TextOptions{
@@ -35,7 +35,7 @@ func CreateCollections(app *pocketbase.PocketBase) error {
 				},
 			},
 			&schema.SchemaField{
-				Name:     "email",
+				Name:     shared.IGAccount_Email,
 				Type:     schema.FieldTypeText,
 				Required: true,
 				Options: &schema.TextOptions{
@@ -43,7 +43,7 @@ func CreateCollections(app *pocketbase.PocketBase) error {
 				},
 			},
 			&schema.SchemaField{
-				Name:     "password",
+				Name:     shared.IGAccount_Password,
 				Type:     schema.FieldTypeText,
 				Required: true,
 				Options: &schema.TextOptions{
@@ -51,7 +51,7 @@ func CreateCollections(app *pocketbase.PocketBase) error {
 				},
 			},
 			&schema.SchemaField{
-				Name:     "igSessionId",
+				Name:     shared.IGAccount_IGSessionID,
 				Type:     schema.FieldTypeText,
 				Required: false,
 				Options: &schema.TextOptions{
@@ -59,7 +59,7 @@ func CreateCollections(app *pocketbase.PocketBase) error {
 				},
 			},
 			&schema.SchemaField{
-				Name:     "user",
+				Name:     shared.IGAccount_User,
 				Type:     schema.FieldTypeRelation,
 				Required: true,
 				Options: &schema.RelationOptions{
@@ -85,12 +85,12 @@ func CreateCollections(app *pocketbase.PocketBase) error {
 		DeleteRule: types.Pointer(""),
 		Schema: schema.NewSchema(
 			&schema.SchemaField{
-				Name:     "startAt",
+				Name:     shared.ScheduledIGReels_StartAt,
 				Type:     schema.FieldTypeDate,
 				Required: true,
 			},
 			&schema.SchemaField{
-				Name:     "intervalInSeconds",
+				Name:     shared.ScheduledIGReels_IntervalInSeconds,
 				Type:     schema.FieldTypeNumber,
 				Required: true,
 				Options: &schema.NumberOptions{
@@ -99,7 +99,7 @@ func CreateCollections(app *pocketbase.PocketBase) error {
 				},
 			},
 			&schema.SchemaField{
-				Name:     "title",
+				Name:     shared.ScheduledIGReels_Title,
 				Type:     schema.FieldTypeText,
 				Required: true,
 				Options: &schema.TextOptions{
@@ -107,7 +107,7 @@ func CreateCollections(app *pocketbase.PocketBase) error {
 				},
 			},
 			&schema.SchemaField{
-				Name:     "caption",
+				Name:     shared.ScheduledIGReels_Caption,
 				Type:     schema.FieldTypeText,
 				Required: true,
 				Options: &schema.TextOptions{
@@ -115,7 +115,7 @@ func CreateCollections(app *pocketbase.PocketBase) error {
 				},
 			},
 			&schema.SchemaField{
-				Name:     "thumbnail",
+				Name:     shared.ScheduledIGReels_Thumbnail,
 				Type:     schema.FieldTypeFile,
 				Required: true,
 				Options: &schema.FileOptions{
@@ -125,7 +125,7 @@ func CreateCollections(app *pocketbase.PocketBase) error {
 				},
 			},
 			&schema.SchemaField{
-				Name:     "video",
+				Name:     shared.ScheduledIGReels_Video,
 				Type:     schema.FieldTypeFile,
 				Required: true,
 				Options: &schema.FileOptions{
@@ -135,7 +135,7 @@ func CreateCollections(app *pocketbase.PocketBase) error {
 				},
 			},
 			&schema.SchemaField{
-				Name:     "igAccount",
+				Name:     shared.ScheduledIGReels_IGAccount,
 				Type:     schema.FieldTypeRelation,
 				Required: true,
 				Options: &schema.RelationOptions{
@@ -161,12 +161,12 @@ func CreateCollections(app *pocketbase.PocketBase) error {
 		DeleteRule: types.Pointer(""),
 		Schema: schema.NewSchema(
 			&schema.SchemaField{
-				Name:     "success",
+				Name:     shared.ScheduledIGReelUploads_Success,
 				Type:     schema.FieldTypeBool,
 				Required: true,
 			},
 			&schema.SchemaField{
-				Name:     "igAccount",
+				Name:     shared.ScheduledIGReelUploads_IGAccount,
 				Type:     schema.FieldTypeRelation,
 				Required: true,
 				Options: &schema.RelationOptions{
@@ -176,7 +176,7 @@ func CreateCollections(app *pocketbase.PocketBase) error {
 				},
 			},
 			&schema.SchemaField{
-				Name:     "scheduledIGReel",
+				Name:     shared.ScheduledIGReelUploads_ScheduledIGReel,
 				Type:     schema.FieldTypeRelation,
 				Required: true,
 				Options: &schema.RelationOptions{

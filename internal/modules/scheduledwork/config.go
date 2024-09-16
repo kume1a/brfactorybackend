@@ -1,8 +1,6 @@
-package config
+package scheduledwork
 
 import (
-	"brfactorybackend/internal/modules/scheduledigreel"
-
 	"github.com/pocketbase/pocketbase"
 	"github.com/robfig/cron"
 )
@@ -12,7 +10,7 @@ func SetupCronJobs(app *pocketbase.PocketBase) {
 
 	// scheduler.AddFunc("0 */10 * * * *", func() {
 	scheduler.AddFunc("*/5 * * * *", func() {
-		scheduledigreel.ExecuteScheduledIGReels(app)
+		ExecuteScheduledIGReels(app)
 	})
 
 	scheduler.Start()

@@ -26,6 +26,8 @@ type SessionTokenResponse struct {
 }
 
 func UploadIGTVVideo(args UploadIGTVVideoArgs) error {
+	return errors.New("Blocked for now")
+
 	envVars, err := config.ParseEnv()
 	if err != nil {
 		log.Println("Couldn't parse env vars, returning")
