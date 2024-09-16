@@ -36,6 +36,7 @@ type EnvVariables struct {
 	IsDevelopment   bool
 	IsProduction    bool
 	Port            string
+	FileURLPrefix   string
 	IGServiceURL    string
 	IGServiceSecret string
 }
@@ -47,6 +48,11 @@ func ParseEnv() (*EnvVariables, error) {
 	}
 
 	port, err := getEnv("PORT")
+	if err != nil {
+		return nil, err
+	}
+
+	fileURLPrefix, err := getEnv("FILE_URL_PREFIX")
 	if err != nil {
 		return nil, err
 	}
@@ -65,6 +71,7 @@ func ParseEnv() (*EnvVariables, error) {
 		IsDevelopment:   environment == "development",
 		IsProduction:    environment == "production",
 		Port:            port,
+		FileURLPrefix:   fileURLPrefix,
 		IGServiceURL:    igServiceURL,
 		IGServiceSecret: igServiceSecret,
 	}, nil

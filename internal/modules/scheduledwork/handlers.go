@@ -54,25 +54,40 @@ func ExecuteScheduledIGReels(app *pocketbase.PocketBase) error {
 			nextIndex = latestIGReelUpload.Index + 1
 		}
 
+		videoFileURL, err := scheduledIGReel.VideoFileURL()
+		if err != nil {
+			log.Println("Couldn't get video file URL, skipping", err)
+			return err
+		}
+
+		thumbnailFileURL, err := scheduledIGReel.ThumbnailFileURL()
+		if err != nil {
+			log.Println("Couldn't get thumbnail file URL, skipping", err)
+			return err
+		}
+
 		uploadIGTVVideoErr := igservice.UploadIGTVVideo(igservice.UploadIGTVVideoArgs{
 			Title:        scheduledIGReel.Title,
 			Caption:      scheduledIGReel.Caption,
 			SessionID:    igSessionID,
-			VideoURL:     scheduledIGReel.VideoURL(),
-			ThumbnailURL: scheduledIGReel.ThumbnailURL(),
+			VideoURL:     videoFileURL,
+			ThumbnailURL: thumbnailFileURL,
 		})
 		if uploadIGTVVideoErr != nil {
 			log.Println("Couldn't upload IG reel, skipping", err)
 		}
 
-		if _, err := scheduledigreelupload.CreateScheduledIGReelUpload(app, scheduledigreelupload.ScheduledIGReelUpload{
-			Success:         uploadIGTVVideoErr == nil,
-			Index:           nextIndex,
-			Title:           scheduledIGReel.Title,
-			Caption:         scheduledIGReel.Caption,
-			IGAccount:       scheduledIGReel.IGAccount,
-			ScheduledIGReel: scheduledIGReel.ID,
-		}); err != nil {
+		if _, err := scheduledigreelupload.CreateScheduledIGReelUpload(
+			app,
+			scheduledigreelupload.ScheduledIGReelUpload{
+				Success:         uploadIGTVVideoErr == nil,
+				Index:           nextIndex,
+				Title:           scheduledIGReel.Title,
+				Caption:         scheduledIGReel.Caption,
+				IGAccount:       scheduledIGReel.IGAccount,
+				ScheduledIGReel: scheduledIGReel.ID,
+			},
+		); err != nil {
 			log.Println("Couldn't create scheduled IG reel upload, skipping", err)
 			return err
 		}
