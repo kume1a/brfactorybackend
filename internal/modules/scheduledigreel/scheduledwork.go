@@ -1,19 +1,19 @@
 package scheduledigreel
 
 import (
+	"log"
+
 	"github.com/pocketbase/pocketbase"
 )
 
-func ExecuteScheduledIGReels(app *pocketbase.PocketBase) {
-	// dao := app.Dao()
+func ExecuteScheduledIGReels(app *pocketbase.PocketBase) error {
+	scheduledIGReels, err := GetAllScheduledIGReels(app)
+	if err != nil {
+		log.Println("Couldn't find scheduled IG reels, returning", err)
+		return err
+	}
 
-	// scheduledIGReels, err := dao.FindRecordsByExpr(shared.CollectionScheduledIGReels, nil, func(q models.Collection) {
-	// 	q.Expand("igAccountId")
-	// })
-	// if err != nil {
-	// 	log.Println("Couldn't find scheduled IG reels, returning", err)
-	// 	return
-	// }
+	return nil
 
 	// for _, scheduledIGReel := range scheduledIGReels {
 	// 	igAccountID, ok := scheduledIGReel["igAccountId"].(string)
