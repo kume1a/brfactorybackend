@@ -6,6 +6,8 @@ import (
 	"brfactorybackend/internal/modules/scheduledigreel"
 	"brfactorybackend/internal/modules/scheduledigreelupload"
 	"log"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/pocketbase/pocketbase"
@@ -66,8 +68,11 @@ func ExecuteScheduledIGReels(app *pocketbase.PocketBase) error {
 			return err
 		}
 
+		title := strings.ReplaceAll(scheduledIGReel.Title, "{indexPlusOne}", strconv.Itoa(nextIndex+1))
+		title = strings.ReplaceAll(title, "{index}", strconv.Itoa(nextIndex))
+
 		uploadIGTVVideoErr := igservice.UploadIGTVVideo(igservice.UploadIGTVVideoArgs{
-			Title:        scheduledIGReel.Title,
+			Title:        title,
 			Caption:      scheduledIGReel.Caption,
 			SessionID:    igSessionID,
 			VideoURL:     videoFileURL,
