@@ -7,6 +7,7 @@ type ScheduledIGReelUpload struct {
 	Created         types.DateTime `json:"created"`
 	Updated         types.DateTime `json:"updated"`
 	Success         bool           `json:"success"`
+	Index           int            `json:"index"`
 	Title           string         `json:"title"`
 	Caption         string         `json:"caption"`
 	IGAccount       string         `json:"igAccount"`

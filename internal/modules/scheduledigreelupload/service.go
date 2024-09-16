@@ -11,7 +11,7 @@ import (
 func GetLatestSuccessScheduledIGReelUpload(
 	app *pocketbase.PocketBase,
 	scheduledIGReelID string,
-) (ScheduledIGReelUpload, error) {
+) (*ScheduledIGReelUpload, error) {
 	dao := app.Dao()
 
 	query := dao.RecordQuery(shared.CollectionScheduledIGReelUploads).
@@ -25,25 +25,32 @@ func GetLatestSuccessScheduledIGReelUpload(
 
 	records := []*models.Record{}
 	if err := query.All(&records); err != nil {
-		return ScheduledIGReelUpload{}, err
+		return nil, err
 	}
 
 	if len(records) == 0 {
-		return ScheduledIGReelUpload{}, nil
+		return nil, nil
 	}
 
-	return ScheduledIGReelUploadRecordToModel(records[0]), nil
+	mapped := ScheduledIGReelUploadRecordToModel(records[0])
+
+	return &mapped, nil
 }
 
-func CreateScheduledIGReelUpload(app *pocketbase.PocketBase, scheduledIGReelUpload ScheduledIGReelUpload) (ScheduledIGReelUpload, error) {
+func CreateScheduledIGReelUpload(
+	app *pocketbase.PocketBase,
+	scheduledIGReelUpload ScheduledIGReelUpload,
+) (*ScheduledIGReelUpload, error) {
 	record, err := ScheduledIGReelUploadModelToRecord(app, scheduledIGReelUpload)
 	if err != nil {
-		return ScheduledIGReelUpload{}, err
+		return nil, err
 	}
 
 	if err := app.Dao().SaveRecord(record); err != nil {
-		return ScheduledIGReelUpload{}, err
+		return nil, err
 	}
 
-	return scheduledIGReelUpload, nil
+	scheduledIGReelUpload.ID = record.Id
+
+	return &scheduledIGReelUpload, nil
 }

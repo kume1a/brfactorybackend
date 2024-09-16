@@ -13,6 +13,7 @@ func ScheduledIGReelUploadRecordToModel(r *models.Record) ScheduledIGReelUpload 
 		Created:         r.Created,
 		Updated:         r.Updated,
 		Success:         r.GetBool(shared.ScheduledIGReelUpload_Success),
+		Index:           r.GetInt(shared.ScheduledIGReelUpload_Index),
 		Title:           r.GetString(shared.ScheduledIGReelUpload_Title),
 		Caption:         r.GetString(shared.ScheduledIGReelUpload_Caption),
 		IGAccount:       r.GetString(shared.ScheduledIGReelUpload_IGAccount),
@@ -29,6 +30,7 @@ func ScheduledIGReelUploadModelToRecord(app *pocketbase.PocketBase, m ScheduledI
 	record := models.NewRecord(collection)
 
 	record.Set(shared.ScheduledIGReelUpload_Success, m.Success)
+	record.Set(shared.ScheduledIGReelUpload_Index, m.Index)
 	record.Set(shared.ScheduledIGReelUpload_Title, m.Title)
 	record.Set(shared.ScheduledIGReelUpload_Caption, m.Caption)
 	record.Set(shared.ScheduledIGReelUpload_IGAccount, m.IGAccount)

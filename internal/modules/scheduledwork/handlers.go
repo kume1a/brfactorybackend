@@ -22,7 +22,7 @@ func ExecuteScheduledIGReels(app *pocketbase.PocketBase) error {
 		igAccount, err := igaccount.GetIGAccountByID(app, scheduledIGReel.IGAccount)
 		if err != nil {
 			log.Println("Couldn't find IG account, skipping", err)
-			continue
+			return err
 		}
 
 		igSessionID, err := igaccount.EnsureIGAccountIGSessionID(app, igAccount.ID)
@@ -38,49 +38,45 @@ func ExecuteScheduledIGReels(app *pocketbase.PocketBase) error {
 			return err
 		}
 
-		now := time.Now()
-		diffSinceLastUpload := now.Sub(latestIGReelUpload.Created.Time())
-		if diffSinceLastUpload.Seconds() < float64(scheduledIGReel.IntervalInSecs) {
-			continue
+		if latestIGReelUpload != nil {
+			now := time.Now()
+			diffSinceLastUpload := now.Sub(latestIGReelUpload.Created.Time())
+
+			if diffSinceLastUpload.Seconds() < float64(scheduledIGReel.IntervalInSecs) {
+				continue
+			}
 		}
 
-		if err := igservice.UploadIGTVVideo(igservice.UploadIGTVVideoArgs{
+		var nextIndex int
+		if latestIGReelUpload == nil {
+			nextIndex = 0
+		} else {
+			nextIndex = latestIGReelUpload.Index + 1
+		}
+
+		uploadIGTVVideoErr := igservice.UploadIGTVVideo(igservice.UploadIGTVVideoArgs{
 			Title:        scheduledIGReel.Title,
 			Caption:      scheduledIGReel.Caption,
 			SessionID:    igSessionID,
-			VideoURL:     "",
-			ThumbnailURL: "",
-		}); err != nil {
+			VideoURL:     scheduledIGReel.VideoURL(),
+			ThumbnailURL: scheduledIGReel.ThumbnailURL(),
+		})
+		if uploadIGTVVideoErr != nil {
 			log.Println("Couldn't upload IG reel, skipping", err)
-			continue
+		}
+
+		if _, err := scheduledigreelupload.CreateScheduledIGReelUpload(app, scheduledigreelupload.ScheduledIGReelUpload{
+			Success:         uploadIGTVVideoErr == nil,
+			Index:           nextIndex,
+			Title:           scheduledIGReel.Title,
+			Caption:         scheduledIGReel.Caption,
+			IGAccount:       scheduledIGReel.IGAccount,
+			ScheduledIGReel: scheduledIGReel.ID,
+		}); err != nil {
+			log.Println("Couldn't create scheduled IG reel upload, skipping", err)
+			return err
 		}
 	}
+
 	return nil
-
-	// --------------------------------------------------------------------------------------------------------------
-
-	// igSessionID, err := igservice.GetIGSessionID(igservice.GetIGSessionTokenArgs{
-	// 	IGUsername: "testbrainrot000@gmail.com",
-	// 	IOPassword: "testbrainrot12345",
-	// })
-	// if err != nil {
-	// 	log.Println("Couldn't get IG session ID, returning")
-	// 	return err
-	// }
-
-	// igSessionID := "67954392189%3AHwXgIx22CTu3OL%3A29%3AAYesRsUA4Hkd9Aayf4ZBqgcWPRShs185SfHv2Dk1Gw"
-
-	// if err := igservice.UploadIGTVVideo(igservice.UploadIGTVVideoArgs{
-	// 	SessionID: igSessionID,
-	// 	VideoURL:  "https://firebasestorage.googleapis.com/v0/b/literature-xii.appspot.com/o/Tough%20times%20never%20last%2C%20only%20tough%20people%20last%20ahuefieifehifeh.mp4?alt=media&token=33c70791-12d5-40f3-bc39-f0e6fba4ed05",
-	// 	Title:     "Test video",
-	// 	Caption:   "Test caption",
-	// 	// ThumbnailURL: "https://www.youtube.com/watch?v=3v1n6b7j5Zk",
-	// }); err != nil {
-	// 	log.Println("Couldn't upload IGTV video, returning")
-	// 	return err
-	// }
-
-	// log.Println("IG session ID: ", igSessionID)
-
 }
