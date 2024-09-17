@@ -14,12 +14,12 @@ import (
 )
 
 func main() {
-	err := config.LoadEnv()
+	app := pocketbase.New()
+
+	err := config.LoadEnv(app)
 	if err != nil {
 		log.Fatal("Couldn't load env vars, returning")
 	}
-
-	app := pocketbase.New()
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 		config.CreateCollections(app)

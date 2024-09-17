@@ -22,7 +22,10 @@ func ScheduledIGReelUploadRecordToModel(r *models.Record) ScheduledIGReelUpload 
 	}
 }
 
-func ScheduledIGReelUploadModelToRecord(app *pocketbase.PocketBase, m ScheduledIGReelUpload) (*models.Record, error) {
+func ScheduledIGReelUploadModelToRecord(
+	app *pocketbase.PocketBase,
+	m ScheduledIGReelUpload,
+) (*models.Record, error) {
 	collection, err := app.Dao().FindCollectionByNameOrId(shared.CollectionScheduledIGReelUploads)
 	if err != nil {
 		return nil, err

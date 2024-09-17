@@ -8,7 +8,7 @@ import (
 func SetupCronJobs(app *pocketbase.PocketBase) {
 	scheduler := cron.New()
 
-	scheduler.AddFunc("0 */1 * * * *", func() {
+	scheduler.AddFunc("0 */15 * * * *", func() {
 		// scheduler.AddFunc("*/10 * * * *", func() {
 		ExecuteScheduledIGReels(app)
 	})

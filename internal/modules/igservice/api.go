@@ -4,10 +4,10 @@ import (
 	"brfactorybackend/internal/config"
 	"encoding/json"
 	"errors"
-	"log"
 	"strconv"
 
 	"github.com/go-resty/resty/v2"
+	"github.com/pocketbase/pocketbase"
 )
 
 type UploadIGTVVideoArgs struct {
@@ -31,16 +31,21 @@ type UploadIGTVVideoDTO struct {
 	MediaID string `json:"mediaId"`
 }
 
-func UploadIGTVVideo(args UploadIGTVVideoArgs) (string, error) {
+func UploadIGTVVideo(
+	app *pocketbase.PocketBase,
+	args UploadIGTVVideoArgs,
+) (string, error) {
+	logger := app.Logger().WithGroup("UploadIGTVVideo")
+
 	envVars, err := config.ParseEnv()
 	if err != nil {
-		log.Println("Couldn't parse env vars, returning")
+		logger.Error("Couldn't parse env vars, returning")
 		return "", err
 	}
 
 	bodyBytes, err := json.Marshal(args)
 	if err != nil {
-		log.Println("Couldn't marshal JSON body, returning")
+		logger.Error("Couldn't marshal JSON body, returning")
 		return "", err
 	}
 
@@ -54,12 +59,13 @@ func UploadIGTVVideo(args UploadIGTVVideoArgs) (string, error) {
 		Post(envVars.IGServiceURL + "/uploadIGTVVideo")
 
 	if err != nil {
+		logger.Error("Error sending request", "err", err)
 		return "", err
 	}
 
 	statusCode := resp.StatusCode()
 	if statusCode > 399 {
-		log.Println("invalid status code " + strconv.Itoa(statusCode) + ", response: " + resp.String())
+		logger.Error("invalid status code " + strconv.Itoa(statusCode) + ", response: " + resp.String())
 		return "", errors.New("invalid status code " + strconv.Itoa(statusCode))
 	}
 
@@ -68,16 +74,21 @@ func UploadIGTVVideo(args UploadIGTVVideoArgs) (string, error) {
 	return res.MediaID, nil
 }
 
-func GetIGSessionID(args GetIGSessionTokenArgs) (string, error) {
+func GetIGSessionID(
+	app *pocketbase.PocketBase,
+	args GetIGSessionTokenArgs,
+) (string, error) {
+	logger := app.Logger().WithGroup("GetIGSessionID")
+
 	envVars, err := config.ParseEnv()
 	if err != nil {
-		log.Println("Couldn't parse env vars, returning")
+		logger.Error("Couldn't parse env vars, returning")
 		return "", err
 	}
 
 	bodyBytes, err := json.Marshal(args)
 	if err != nil {
-		log.Println("Couldn't marshal JSON body, returning")
+		logger.Error("Couldn't marshal JSON body, returning")
 		return "", err
 	}
 
@@ -91,12 +102,13 @@ func GetIGSessionID(args GetIGSessionTokenArgs) (string, error) {
 		Post(envVars.IGServiceURL + "/getSessionId")
 
 	if err != nil {
+		logger.Error("Error sending request", "err", err)
 		return "", err
 	}
 
 	statusCode := resp.StatusCode()
 	if statusCode > 399 {
-		log.Println("invalid status code " + strconv.Itoa(statusCode) + ", response: " + resp.String())
+		logger.Error("invalid status code " + strconv.Itoa(statusCode) + ", response: " + resp.String())
 		return "", errors.New("invalid status code " + strconv.Itoa(statusCode))
 	}
 

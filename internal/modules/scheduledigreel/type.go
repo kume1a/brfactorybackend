@@ -1,9 +1,6 @@
 package scheduledigreel
 
 import (
-	"brfactorybackend/internal/config"
-	"brfactorybackend/internal/shared"
-
 	"github.com/pocketbase/pocketbase/tools/types"
 )
 
@@ -18,22 +15,4 @@ type ScheduledIGReel struct {
 	ThumbnailFileID string         `json:"thumbnailFileId"`
 	VideoFileID     string         `json:"videoFileId"`
 	IGAccount       string         `json:"igAccount"`
-}
-
-func (r *ScheduledIGReel) VideoFileURL() (string, error) {
-	env, err := config.ParseEnv()
-	if err != nil {
-		return "", err
-	}
-
-	return env.FileURLPrefix + shared.ConstructPBFilePath(shared.CollectionScheduledIGReels, r.ID, r.VideoFileID), nil
-}
-
-func (r *ScheduledIGReel) ThumbnailFileURL() (string, error) {
-	env, err := config.ParseEnv()
-	if err != nil {
-		return "", err
-	}
-
-	return env.FileURLPrefix + shared.ConstructPBFilePath(shared.CollectionScheduledIGReels, r.ID, r.ThumbnailFileID), nil
 }

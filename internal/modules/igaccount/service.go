@@ -23,7 +23,10 @@ func GetAllIGAccounts(app *pocketbase.PocketBase) ([]IGAccount, error) {
 	return mapped, nil
 }
 
-func GetIGAccountByID(app *pocketbase.PocketBase, id string) (IGAccount, error) {
+func GetIGAccountByID(
+	app *pocketbase.PocketBase,
+	id string,
+) (IGAccount, error) {
 	dao := app.Dao()
 
 	record, err := dao.FindRecordById(shared.CollectionIGAccounts, id)
@@ -34,7 +37,10 @@ func GetIGAccountByID(app *pocketbase.PocketBase, id string) (IGAccount, error) 
 	return IGAccountRecordToModel(record), nil
 }
 
-func EnsureIGAccountIGSessionID(app *pocketbase.PocketBase, id string) (string, error) {
+func EnsureIGAccountIGSessionID(
+	app *pocketbase.PocketBase,
+	id string,
+) (string, error) {
 	dao := app.Dao()
 
 	igAccountRecord, err := dao.FindRecordById(shared.CollectionIGAccounts, id)
@@ -47,10 +53,13 @@ func EnsureIGAccountIGSessionID(app *pocketbase.PocketBase, id string) (string, 
 		return igAccount.IGSessionID, nil
 	}
 
-	igSessionID, err := igservice.GetIGSessionID(igservice.GetIGSessionTokenArgs{
-		IGUsername: igAccount.Email,
-		IOPassword: igAccount.Password,
-	})
+	igSessionID, err := igservice.GetIGSessionID(
+		app,
+		igservice.GetIGSessionTokenArgs{
+			IGUsername: igAccount.Email,
+			IOPassword: igAccount.Password,
+		},
+	)
 	if err != nil {
 		return "", err
 	}

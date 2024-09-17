@@ -7,9 +7,12 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
+	"github.com/pocketbase/pocketbase"
 )
 
-func LoadEnv() error {
+func LoadEnv(app *pocketbase.PocketBase) error {
+	logger := app.Logger().WithGroup("LoadEnv")
+
 	// TODO: make sure to add env in Dockerfile
 	env := os.Getenv("BRFACTORY_ENV")
 	if env == "" {
@@ -24,7 +27,7 @@ func LoadEnv() error {
 	if env == "development" {
 		envPath := ".env." + env
 
-		log.Println("Loading env file: " + envPath)
+		logger.Error("Loading env file: " + envPath)
 
 		return godotenv.Load(envPath)
 	}
