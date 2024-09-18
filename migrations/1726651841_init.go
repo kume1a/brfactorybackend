@@ -1,8 +1,6 @@
 package migrations
 
 import (
-	"brfactorybackend/internal/shared"
-
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase/daos"
 	m "github.com/pocketbase/pocketbase/migrations"
@@ -15,13 +13,13 @@ func init() {
 	m.Register(func(db dbx.Builder) error {
 		dao := daos.New(db)
 
-		usersCollection, err := dao.FindCollectionByNameOrId(shared.CollectionUsers)
+		usersCollection, err := dao.FindCollectionByNameOrId("users")
 		if err != nil {
 			return err
 		}
 
 		igAccountsCollection := &models.Collection{
-			Name:       shared.CollectionIGAccounts,
+			Name:       "igAccounts",
 			Type:       models.CollectionTypeBase,
 			ListRule:   types.Pointer(""),
 			ViewRule:   types.Pointer(""),
@@ -30,7 +28,7 @@ func init() {
 			DeleteRule: types.Pointer(""),
 			Schema: schema.NewSchema(
 				&schema.SchemaField{
-					Name:     shared.IGAccount_Username,
+					Name:     "username",
 					Type:     schema.FieldTypeText,
 					Required: true,
 					Options: &schema.TextOptions{
@@ -38,7 +36,7 @@ func init() {
 					},
 				},
 				&schema.SchemaField{
-					Name:     shared.IGAccount_Email,
+					Name:     "email",
 					Type:     schema.FieldTypeText,
 					Required: true,
 					Options: &schema.TextOptions{
@@ -46,7 +44,7 @@ func init() {
 					},
 				},
 				&schema.SchemaField{
-					Name:     shared.IGAccount_Password,
+					Name:     "password",
 					Type:     schema.FieldTypeText,
 					Required: true,
 					Options: &schema.TextOptions{
@@ -54,7 +52,7 @@ func init() {
 					},
 				},
 				&schema.SchemaField{
-					Name:     shared.IGAccount_IGSessionID,
+					Name:     "igSessionId",
 					Type:     schema.FieldTypeText,
 					Required: false,
 					Options: &schema.TextOptions{
@@ -62,7 +60,7 @@ func init() {
 					},
 				},
 				&schema.SchemaField{
-					Name:     shared.IGAccount_User,
+					Name:     "user",
 					Type:     schema.FieldTypeRelation,
 					Required: true,
 					Options: &schema.RelationOptions{
@@ -79,7 +77,7 @@ func init() {
 		}
 
 		scheduledIGReelsCollection := &models.Collection{
-			Name:       shared.CollectionScheduledIGReels,
+			Name:       "scheduledIGReels",
 			Type:       models.CollectionTypeBase,
 			ListRule:   types.Pointer(""),
 			ViewRule:   types.Pointer(""),
@@ -88,12 +86,12 @@ func init() {
 			DeleteRule: types.Pointer(""),
 			Schema: schema.NewSchema(
 				&schema.SchemaField{
-					Name:     shared.ScheduledIGReel_StartAt,
+					Name:     "startAt",
 					Type:     schema.FieldTypeDate,
 					Required: true,
 				},
 				&schema.SchemaField{
-					Name:     shared.ScheduledIGReel_IntervalInSeconds,
+					Name:     "intervalInSeconds",
 					Type:     schema.FieldTypeNumber,
 					Required: true,
 					Options: &schema.NumberOptions{
@@ -102,7 +100,7 @@ func init() {
 					},
 				},
 				&schema.SchemaField{
-					Name:     shared.ScheduledIGReel_Title,
+					Name:     "title",
 					Type:     schema.FieldTypeText,
 					Required: true,
 					Options: &schema.TextOptions{
@@ -110,7 +108,7 @@ func init() {
 					},
 				},
 				&schema.SchemaField{
-					Name:     shared.ScheduledIGReel_Caption,
+					Name:     "caption",
 					Type:     schema.FieldTypeText,
 					Required: true,
 					Options: &schema.TextOptions{
@@ -118,7 +116,7 @@ func init() {
 					},
 				},
 				&schema.SchemaField{
-					Name:     shared.ScheduledIGReel_ThumbnailFileID,
+					Name:     "thumbnailFileId",
 					Type:     schema.FieldTypeFile,
 					Required: true,
 					Options: &schema.FileOptions{
@@ -128,7 +126,7 @@ func init() {
 					},
 				},
 				&schema.SchemaField{
-					Name:     shared.ScheduledIGReel_VideoFileID,
+					Name:     "videoFileId",
 					Type:     schema.FieldTypeFile,
 					Required: true,
 					Options: &schema.FileOptions{
@@ -138,7 +136,7 @@ func init() {
 					},
 				},
 				&schema.SchemaField{
-					Name:     shared.ScheduledIGReel_IGAccount,
+					Name:     "igAccount",
 					Type:     schema.FieldTypeRelation,
 					Required: true,
 					Options: &schema.RelationOptions{
@@ -155,7 +153,7 @@ func init() {
 		}
 
 		scheduledIGReelUploadsCollection := &models.Collection{
-			Name:       shared.CollectionScheduledIGReelUploads,
+			Name:       "scheduledIGReelUploads",
 			Type:       models.CollectionTypeBase,
 			ListRule:   types.Pointer(""),
 			ViewRule:   types.Pointer(""),
@@ -164,12 +162,12 @@ func init() {
 			DeleteRule: types.Pointer(""),
 			Schema: schema.NewSchema(
 				&schema.SchemaField{
-					Name:     shared.ScheduledIGReelUpload_Success,
+					Name:     "success",
 					Type:     schema.FieldTypeBool,
 					Required: true,
 				},
 				&schema.SchemaField{
-					Name:     shared.ScheduledIGReelUpload_Index,
+					Name:     "index",
 					Type:     schema.FieldTypeNumber,
 					Required: true,
 					Options: &schema.NumberOptions{
@@ -178,7 +176,7 @@ func init() {
 					},
 				},
 				&schema.SchemaField{
-					Name:     shared.ScheduledIGReelUpload_Title,
+					Name:     "title",
 					Type:     schema.FieldTypeText,
 					Required: true,
 					Options: &schema.TextOptions{
@@ -186,7 +184,7 @@ func init() {
 					},
 				},
 				&schema.SchemaField{
-					Name:     shared.ScheduledIGReelUpload_Caption,
+					Name:     "caption",
 					Type:     schema.FieldTypeText,
 					Required: true,
 					Options: &schema.TextOptions{
@@ -194,7 +192,7 @@ func init() {
 					},
 				},
 				&schema.SchemaField{
-					Name:     shared.ScheduledIGReelUpload_IGMediaID,
+					Name:     "igMediaId",
 					Type:     schema.FieldTypeText,
 					Required: false,
 					Options: &schema.TextOptions{
@@ -202,7 +200,7 @@ func init() {
 					},
 				},
 				&schema.SchemaField{
-					Name:     shared.ScheduledIGReelUpload_IGAccount,
+					Name:     "igAccount",
 					Type:     schema.FieldTypeRelation,
 					Required: true,
 					Options: &schema.RelationOptions{
@@ -212,7 +210,7 @@ func init() {
 					},
 				},
 				&schema.SchemaField{
-					Name:     shared.ScheduledIGReelUpload_ScheduledIGReel,
+					Name:     "scheduledIGReel",
 					Type:     schema.FieldTypeRelation,
 					Required: true,
 					Options: &schema.RelationOptions{
@@ -232,17 +230,17 @@ func init() {
 	}, func(db dbx.Builder) error {
 		dao := daos.New(db)
 
-		igAccountsCollection, err := dao.FindCollectionByNameOrId(shared.CollectionIGAccounts)
+		igAccountsCollection, err := dao.FindCollectionByNameOrId("igAccounts")
 		if err != nil {
 			return err
 		}
 
-		scheduledIGReelsCollection, err := dao.FindCollectionByNameOrId(shared.CollectionScheduledIGReels)
+		scheduledIGReelsCollection, err := dao.FindCollectionByNameOrId("scheduledIGReels")
 		if err != nil {
 			return err
 		}
 
-		scheduledIGReelUploadsCollection, err := dao.FindCollectionByNameOrId(shared.CollectionScheduledIGReelUploads)
+		scheduledIGReelUploadsCollection, err := dao.FindCollectionByNameOrId("scheduledIGReelUploads")
 		if err != nil {
 			return err
 		}
