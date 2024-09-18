@@ -16,5 +16,7 @@ COPY --from=builder /build/app .
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt \
                     /etc/ssl/certs/
 
+ENV BRFACTORY_ENV=production
+
 ENTRYPOINT [ "./app" ]
 CMD [ "serve", "--http=0.0.0.0:8080" ]

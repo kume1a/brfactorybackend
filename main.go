@@ -13,6 +13,8 @@ import (
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/plugins/migratecmd"
+
+	_ "brfactorybackend/migrations"
 )
 
 func main() {
@@ -33,8 +35,6 @@ func main() {
 	}
 
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
-		config.CreateCollections(app)
-
 		e.Router.GET("/*", apis.StaticDirectoryHandler(os.DirFS("./public"), false))
 
 		e.Router.Use(middleware.CORSWithConfig(middleware.CORSConfig{
