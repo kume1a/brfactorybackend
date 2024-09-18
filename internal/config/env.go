@@ -27,7 +27,7 @@ func LoadEnv(app *pocketbase.PocketBase) error {
 	if env == "development" {
 		envPath := ".env." + env
 
-		logger.Error("Loading env file: " + envPath)
+		logger.Info("Loading env file: " + envPath)
 
 		return godotenv.Load(envPath)
 	}
