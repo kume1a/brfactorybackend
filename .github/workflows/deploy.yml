@@ -21,7 +21,7 @@ jobs:
         run: docker-compose up -d
 
     env:
-      ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
-      FILE_URL_PREFIX: ${{ secrets.FILE_URL_PREFIX }}
-      IG_SERVICE_URL: ${{ secrets.IG_SERVICE_URL }}
-      IG_SERVICE_SECRET: ${{ secrets.IG_SERVICE_SECRET }}
+      ENVIRONMENT: ${{ variables.ENVIRONMENT }}
+      FILE_URL_PREFIX: ${{ variables.FILE_URL_PREFIX }}
+      IG_SERVICE_URL: ${{ variables.IG_SERVICE_URL }}
+      IG_SERVICE_SECRET: ${{ variables.IG_SERVICE_SECRET }}
