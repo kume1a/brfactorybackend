@@ -22,18 +22,6 @@ jobs:
 
     env:
       ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
-      PORT: ${{ secrets.PORT }}
-      DB_URL: ${{ secrets.DB_URL }}
-      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-      POSTGRES_USERNAME: ${{ secrets.POSTGRES_USERNAME }}
-      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
-      REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
-      REDIS_ADDRESS: ${{ secrets.REDIS_ADDRESS }}
-      GOOGLE_CLIENT_KEY: ${{ secrets.GOOGLE_CLIENT_KEY }}
-      ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
-      ACCESS_TOKEN_EXP_MILLIS: ${{ secrets.ACCESS_TOKEN_EXP_MILLIS }}
-      PUBLIC_DIR: ${{ secrets.PUBLIC_DIR }}
-      SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
-      SPOTIFY_CLIENT_SECRET: ${{ secrets.SPOTIFY_CLIENT_SECRET }}
-      SPOTIFY_REDIRECT_URI: ${{ secrets.SPOTIFY_REDIRECT_URI }}
-      MAX_UPLOAD_SIZE_BYTES: ${{ secrets.MAX_UPLOAD_SIZE_BYTES }}
+      FILE_URL_PREFIX: ${{ secrets.FILE_URL_PREFIX }}
+      IG_SERVICE_URL: ${{ secrets.IG_SERVICE_URL }}
+      IG_SERVICE_SECRET: ${{ secrets.IG_SERVICE_SECRET }}
