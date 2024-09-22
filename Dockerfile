@@ -19,4 +19,4 @@ COPY --from=builder /etc/ssl/certs/ca-certificates.crt \
 ENV BRFACTORY_ENV=production
 
 ENTRYPOINT [ "./app" ]
-CMD [ "serve", "--http=0.0.0.0:8080" ]
+CMD [ "serve", "--http=0.0.0.0:8090" ]
