@@ -15,9 +15,9 @@ services:
       IG_SERVICE_URL: ${IG_SERVICE_URL}
       IG_SERVICE_SECRET: ${IG_SERVICE_SECRET}
     volumes:
-      - /home/toko/dev/brfactorybackend/pb_data:/app/pb_data
-      - /home/toko/dev/brfactorybackend/pb_public:/app/pb_public
-      - /home/toko/dev/brfactorybackend/pb_migrations:/app/pb_migrations
+      - /home/toko/dev/brainrot_factory/brfactorybackend/pb_data:/app/pb_data
+      - /home/toko/dev/brainrot_factory/brfactorybackend/pb_public:/app/pb_public
+      - /home/toko/dev/brainrot_factory/brfactorybackend/pb_migrations:/app/pb_migrations
     healthcheck: 
       test: wget --no-verbose --tries=1 --spider http://localhost:8090/api/health || exit 1
       interval: 60s
