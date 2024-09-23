@@ -5,6 +5,7 @@ import (
 	"brfactorybackend/internal/modules/igservice"
 	"brfactorybackend/internal/modules/scheduledigreel"
 	"brfactorybackend/internal/modules/scheduledigreelupload"
+	"log"
 	"time"
 
 	"github.com/pocketbase/pocketbase"
@@ -13,13 +14,19 @@ import (
 func ExecuteScheduledIGReels(app *pocketbase.PocketBase) error {
 	logger := app.Logger().WithGroup("ExecuteScheduledIGReels")
 
+	log.Println("Executing scheduled IG reels")
+
 	scheduledIGReels, err := scheduledigreel.GetAllScheduledIGReels(app)
 	if err != nil {
 		logger.Error("Couldn't find scheduled IG reels, returning", "err", err)
 		return err
 	}
 
+	log.Println("Found ", len(scheduledIGReels), " scheduled IG reels")
+
 	for _, scheduledIGReel := range scheduledIGReels {
+		log.Println("Processing scheduled IG reel: ", scheduledIGReel.ID)
+
 		if scheduledIGReel.StartAt.Time().Before(time.Now()) {
 			logger.Debug("Scheduled IG Reel " + scheduledIGReel.ID + " is not ready to be uploaded yet, skipping")
 			continue
