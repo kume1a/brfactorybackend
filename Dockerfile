@@ -8,7 +8,7 @@ RUN apk update && apk upgrade && \
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -o app main.go
 
-FROM scratch
+FROM alpine AS app
 
 WORKDIR /app
 
