@@ -18,7 +18,6 @@ COPY --from=builder /etc/ssl/certs/ca-certificates.crt \
 
 ENV BRFACTORY_ENV=production
 
-# Copy a custom entrypoint script to handle commands
 COPY dockerentrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
