@@ -25,7 +25,7 @@ func ExecuteScheduledIGReels(app *pocketbase.PocketBase) error {
 	for _, scheduledIGReel := range scheduledIGReels {
 		log.Println("Processing scheduled IG reel: ", scheduledIGReel.ID)
 
-		if scheduledIGReel.StartAt.Time().Before(time.Now()) {
+		if scheduledIGReel.StartAt.Time().After(time.Now()) {
 			log.Println("Scheduled IG Reel " + scheduledIGReel.ID + " is not ready to be uploaded yet, skipping")
 			continue
 		}
