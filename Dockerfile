@@ -17,7 +17,9 @@ COPY --from=builder /etc/ssl/certs/ca-certificates.crt \
                     /etc/ssl/certs/
 
 ENV BRFACTORY_ENV=production
-RUN echo "172.17.0.1 host.docker.internal" >> /etc/hosts
 
-ENTRYPOINT [ "./app" ]
-CMD [ "serve", "--http=0.0.0.0:8090" ]
+# Copy a custom entrypoint script to handle commands
+COPY dockerentrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
