@@ -30,10 +30,6 @@ func main() {
 		Automigrate: isGoRun,
 	})
 
-	if err := app.Start(); err != nil {
-		log.Fatal(err)
-	}
-
 	app.OnBeforeServe().Add(func(e *core.ServeEvent) error {
 		e.Router.GET("/*", apis.StaticDirectoryHandler(os.DirFS("./public"), false))
 
