@@ -6,6 +6,7 @@ volumes:
 services:
   brfactorybackend:
     build: ./
+    network_mode: "host"
     ports:
       - "8090:8090"
     restart: unless-stopped
