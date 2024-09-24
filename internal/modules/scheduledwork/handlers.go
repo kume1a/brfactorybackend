@@ -87,7 +87,7 @@ func ExecuteScheduledIGReels(app *pocketbase.PocketBase) error {
 		title := scheduledIGReel.FormattedTitle(nextIndex)
 		caption := scheduledIGReel.FormattedCaption(nextIndex)
 
-		log.Println("Sending video to IGTV")
+		log.Println("Sending video to IGTV, title: ", title, "caption: ", caption, "videoFileURL: ", videoFileURL, "thumbnailFileURL: ", thumbnailFileURL)
 
 		igMediaID, uploadIGTVVideoErr := igservice.UploadIGTVVideo(
 			app,
