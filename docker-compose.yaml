@@ -1,8 +1,5 @@
 version: "3"
 
-volumes:
-  pb_data:
-
 services:
   brfactorybackend:
     build: ./
@@ -16,5 +13,3 @@ services:
       IG_SERVICE_SECRET: ${IG_SERVICE_SECRET}
     volumes:
       - /home/toko/dev/brainrot_factory/brfactorybackend/pb_data:/app/pb_data
-      - /home/toko/dev/brainrot_factory/brfactorybackend/pb_public:/app/pb_public
-      - /home/toko/dev/brainrot_factory/brfactorybackend/pb_migrations:/app/pb_migrations
