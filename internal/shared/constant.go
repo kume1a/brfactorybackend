@@ -14,6 +14,7 @@ const (
 	CollectionScheduledIGReels = "scheduledIGReels"
 
 	ScheduledIGReel_StartAt           = "startAt"
+	ScheduledIGReel_NextUploadTime    = "nextUploadTime"
 	ScheduledIGReel_IntervalInSeconds = "intervalInSeconds"
 	ScheduledIGReel_Title             = "title"
 	ScheduledIGReel_Caption           = "caption"

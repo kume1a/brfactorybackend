@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/pocketbase/pocketbase"
+	"github.com/pocketbase/pocketbase/tools/types"
 )
 
 func ExecuteScheduledIGReels(app *pocketbase.PocketBase) error {
@@ -19,22 +20,35 @@ func ExecuteScheduledIGReels(app *pocketbase.PocketBase) error {
 	}
 
 	for _, scheduledIGReel := range scheduledIGReels {
-		log.Println("Processing scheduled IG reel: ", scheduledIGReel.ID)
+		if scheduledIGReel.NextUploadTime.IsZero() {
+			intervalDuration := time.Duration(scheduledIGReel.IntervalInSecs) * time.Second
+			initialUploadTime, err := types.ParseDateTime(scheduledIGReel.StartAt.Time().Add(intervalDuration))
+			if err != nil {
+				log.Println("Couldn't parse initial upload time, returning", "err", err)
+				return err
+			}
 
-		if scheduledIGReel.StartAt.Time().After(time.Now()) {
+			scheduledIGReel.NextUploadTime = initialUploadTime
+			if err := scheduledigreel.UpdateScheduledIGReel(app, scheduledIGReel.ID, scheduledIGReel); err != nil {
+				log.Println("Couldn't update scheduled IG reel, returning", "err", err)
+				return err
+			}
+		}
+
+		if scheduledIGReel.NextUploadTime.Time().After(time.Now()) {
 			log.Println("Scheduled IG Reel " + scheduledIGReel.ID + " is not ready to be uploaded yet, skipping")
 			continue
 		}
 
 		igAccount, err := igaccount.GetIGAccountByID(app, scheduledIGReel.IGAccount)
 		if err != nil {
-			log.Println("Couldn't find IG account, skipping", "err", err)
+			log.Println("Couldn't find IG account, returning", "err", err)
 			return err
 		}
 
 		igSessionID, err := igaccount.EnsureIGAccountIGSessionID(app, igAccount.ID)
 		if err != nil {
-			log.Println("Couldn't get IG session ID, skipping", "err", err)
+			log.Println("Couldn't get IG session ID, returning", "err", err)
 			return err
 		}
 
@@ -43,18 +57,8 @@ func ExecuteScheduledIGReels(app *pocketbase.PocketBase) error {
 			scheduledIGReel.ID,
 		)
 		if err != nil {
-			log.Println("Couldn't get latest success scheduled IG reel upload, skipping", "err", err)
+			log.Println("Couldn't get latest success scheduled IG reel upload, returning", "err", err)
 			return err
-		}
-
-		if latestIGReelUpload != nil {
-			now := time.Now()
-			diffSinceLastUpload := now.Sub(latestIGReelUpload.Created.Time())
-
-			if diffSinceLastUpload.Seconds() < float64(scheduledIGReel.IntervalInSecs) {
-				log.Println("scheduledIGReelID: " + scheduledIGReel.ID + ", It's not time to upload yet, skipping, " + "diffSinceLastUpload: " + diffSinceLastUpload.String())
-				continue
-			}
 		}
 
 		var nextIndex int
@@ -66,13 +70,13 @@ func ExecuteScheduledIGReels(app *pocketbase.PocketBase) error {
 
 		videoFileURL, err := scheduledIGReel.VideoFileURL()
 		if err != nil {
-			log.Println("Couldn't get video file URL, skipping", "err", err)
+			log.Println("Couldn't get video file URL, returning", "err", err)
 			return err
 		}
 
 		thumbnailFileURL, err := scheduledIGReel.ThumbnailFileURL()
 		if err != nil {
-			log.Println("Couldn't get thumbnail file URL, skipping", "err", err)
+			log.Println("Couldn't get thumbnail file URL, returning", "err", err)
 			return err
 		}
 
@@ -105,8 +109,24 @@ func ExecuteScheduledIGReels(app *pocketbase.PocketBase) error {
 				ScheduledIGReel: scheduledIGReel.ID,
 			},
 		); err != nil {
-			log.Println("Couldn't create scheduled IG reel upload, skipping", "err", err)
+			log.Println("Couldn't create scheduled IG reel upload, returning", "err", err)
 			return err
+		}
+
+		if uploadIGTVVideoErr == nil {
+			intervalDuration := time.Duration(scheduledIGReel.IntervalInSecs) * time.Second
+			nextUploadTime, err := types.ParseDateTime(scheduledIGReel.NextUploadTime.Time().Add(intervalDuration))
+			if err != nil {
+				log.Println("Couldn't parse next upload time, returning", "err", err)
+				return err
+			}
+
+			scheduledIGReel.NextUploadTime = nextUploadTime
+
+			if err := scheduledigreel.UpdateScheduledIGReel(app, scheduledIGReel.ID, scheduledIGReel); err != nil {
+				log.Println("Couldn't update scheduled IG reel, returning", "err", err)
+				return err
+			}
 		}
 	}
 

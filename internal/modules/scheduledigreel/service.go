@@ -21,3 +21,16 @@ func GetAllScheduledIGReels(app *pocketbase.PocketBase) ([]ScheduledIGReel, erro
 
 	return mapped, nil
 }
+
+func UpdateScheduledIGReel(app *pocketbase.PocketBase, id string, payload ScheduledIGReel) error {
+	dao := app.Dao()
+
+	record, err := dao.FindRecordById(shared.CollectionScheduledIGReels, id)
+	if err != nil {
+		return err
+	}
+
+	ScheduledIGReelSetRecordFields(record, payload)
+
+	return dao.SaveRecord(record)
+}

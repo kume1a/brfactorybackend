@@ -9,6 +9,7 @@ type ScheduledIGReel struct {
 	Created         types.DateTime `json:"created"`
 	Updated         types.DateTime `json:"updated"`
 	StartAt         types.DateTime `json:"startAt"`
+	NextUploadTime  types.DateTime `json:"nextUploadTime"`
 	IntervalInSecs  int            `json:"intervalInSeconds"`
 	Title           string         `json:"title"`
 	Caption         string         `json:"caption"`
