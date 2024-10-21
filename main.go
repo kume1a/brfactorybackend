@@ -1,7 +1,6 @@
 package main
 
 import (
-	"brfactorybackend/internal/config"
 	"brfactorybackend/internal/modules/scheduledwork"
 	"log"
 	"net/http"
@@ -17,13 +16,13 @@ import (
 	_ "brfactorybackend/migrations"
 )
 
-func main() {
+func main1() {
 	app := pocketbase.New()
 
-	err := config.LoadEnv(app)
-	if err != nil {
-		log.Fatal("Couldn't load env vars, returning")
-	}
+	// err := config.LoadEnv(app)
+	// if err != nil {
+	// 	log.Fatal("Couldn't load env vars, returning")
+	// }
 
 	isGoRun := strings.Contains(os.Args[0], "\\tmp\\") || strings.Contains(os.Args[0], "/tmp/")
 	migratecmd.MustRegister(app, app.RootCmd, migratecmd.Config{
