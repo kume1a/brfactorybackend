@@ -16,8 +16,6 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/go-resty/resty/v2"
-
 	"github.com/google/uuid"
 )
 
@@ -164,25 +162,27 @@ func stitchVideoWithAudioAndSubtitles(videoFile string, audioFiles []string, srt
 	return cmd.Run()
 }
 
-// Main function to orchestrate everything
 func main() {
-	err := config.LoadEnv()
-	if err != nil {
+	if err := config.LoadEnv(); err != nil {
 		log.Fatal("Couldn't load env vars, returning")
 	}
 
-	story := "This is the first sentence. This is the second sentence."
-	sentences := splitTextIntoSentences(story)
+	// story := "This is the first sentence. This is the second sentence."
+	// sentences := splitTextIntoSentences(story)
 
-	log.Println("sentences", sentences)
-	log.Println("len", len(sentences))
+	// log.Println("sentences", sentences)
+	// log.Println("len", len(sentences))
 
-	lastGeneratedVoiceID, err := GetLastGeneratedVoiceID()
-	if err != nil {
-		log.Fatal(err)
-	}
+	// lastGeneratedVoiceID, err := GetLastGeneratedVoiceID()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	log.Println("lastGeneratedVoiceID", lastGeneratedVoiceID)
+	// log.Println("lastGeneratedVoiceID", lastGeneratedVoiceID)
+
+	// DownloadVoice(lastGeneratedVoiceID, "audio.mp3", VoiceDownloadTypeMP3)
+
+	test()
 
 	// var durations []float64
 	// var audioFiles []string
@@ -329,44 +329,44 @@ func GetLastGeneratedVoiceID() (string, error) {
 		return "", err
 	}
 
-	bodyBytes, err := json.Marshal(MicmonsterListVoicesBodyDTO{
-		Start:          "0",
-		Limit:          "1",
-		SortBy:         "created_at",
-		SortOrder:      "DESC",
-		ProjectID:      env.MicmonsterProjectID,
-		ProjectIDPlain: env.MicmonsterProjectIDPlain,
-		CsrfTestName:   "5d0f455a0c885b5d26401731eae2b85a",
-		Timezone:       "Asia/Tbilisi",
-	})
-	if err != nil {
-		log.Println("Error getting last generated voice id, marshalling body", err)
-		return "", err
-	}
+	data := url.Values{}
+	data.Set("start", "0")
+	data.Set("limit", "1")
+	data.Set("sortBy", "created_at")
+	data.Set("sortOrder", "DESC")
+	data.Set("project_id", env.MicmonsterProjectID)
+	data.Set("project_id_plain", env.MicmonsterProjectIDPlain)
+	data.Set("csrf_test_name", "5d0f455a0c885b5d26401731eae2b85a")
+	data.Set("timezone", "Asia/Tbilisi")
 
-	client := resty.New()
-
-	resp, err := client.R().
-		SetBody(bodyBytes).
-		SetResult(&MicmonsterListVoicesDTO{}).
-		SetCookies(cookies).
-		SetHeader("Content-Type", "application/x-www-form-urlencoded").
-		Post(env.MicmonsterApiURL + "/list-voices")
-
+	req, err := http.NewRequest("POST", env.MicmonsterApiURL+"/list-voices", bytes.NewBufferString(data.Encode()))
 	if err != nil {
 		log.Println("Error getting last generated voice id, creating request", err)
 		return "", err
 	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
-	log.Println("resp.", resp.String())
-	statusCode := strconv.Itoa(resp.StatusCode())
-	if resp.IsError() {
-		log.Println("invalid status code " + statusCode + ", response: " + resp.String())
-		return "", errors.New("invalid status code " + statusCode)
+	for _, cookie := range cookies {
+		req.AddCookie(cookie)
 	}
 
-	res := resp.Result().(*MicmonsterListVoicesDTO)
-	log.Println("resp.", resp.String())
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		log.Println("Error getting last generated voice id, sending request", err)
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		log.Println("invalid status code", resp.StatusCode, "response:", resp.Status)
+		return "", errors.New("invalid status code " + strconv.Itoa(resp.StatusCode))
+	}
+
+	var res MicmonsterListVoicesDTO
+	if err := json.NewDecoder(resp.Body).Decode(&res); err != nil {
+		log.Println("Error decoding response", err)
+		return "", err
+	}
 
 	if len(res.Voices) > 0 {
 		return res.Voices[0].ID, nil
@@ -376,93 +376,12 @@ func GetLastGeneratedVoiceID() (string, error) {
 	return "", nil
 }
 
-// func GetLastGeneratedVoiceID() (string, error) {
-// 	env, err := config.ParseEnv()
-// 	if err != nil {
-// 		return "", err
-// 	}
+type VoiceDownloadType string
 
-// 	cookies, err := getCookies()
-// 	if err != nil {
-// 		log.Println("Error getting last generated voice id, getting cookies", err)
-// 		return "", err
-// 	}
-
-// 	data := url.Values{}
-// 	data.Set("start", "0")
-// 	data.Set("limit", "1")
-// 	data.Set("sortBy", "created_at")
-// 	data.Set("sortOrder", "DESC")
-// 	data.Set("project_id", env.MicmonsterProjectID)
-// 	data.Set("project_id_plain", env.MicmonsterProjectIDPlain)
-// 	data.Set("csrf_test_name", "5d0f455a0c885b5d26401731eae2b85a")
-// 	data.Set("timezone", "Asia/Tbilisi")
-
-// 	req, err := http.NewRequest("POST", env.MicmonsterApiURL+"/list-voices", bytes.NewBufferString(data.Encode()))
-// 	if err != nil {
-// 		log.Println("Error getting last generated voice id, creating request", err)
-// 		return "", err
-// 	}
-// 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-
-// 	for _, cookie := range cookies {
-// 		req.AddCookie(cookie)
-// 	}
-
-// 	resp, err := http.DefaultClient.Do(req)
-// 	if err != nil {
-// 		log.Println("Error getting last generated voice id, sending request", err)
-// 		return "", err
-// 	}
-// 	defer resp.Body.Close()
-
-// 	if resp.StatusCode != http.StatusOK {
-// 		log.Println("invalid status code", resp.StatusCode, "response:", resp.Status)
-// 		return "", errors.New("invalid status code " + strconv.Itoa(resp.StatusCode))
-// 	}
-
-// 	var res MicmonsterListVoicesDTO
-// 	if err := json.NewDecoder(resp.Body).Decode(&res); err != nil {
-// 		log.Println("Error decoding response", err)
-// 		return "", err
-// 	}
-
-// 	if len(res.Voices) > 0 {
-// 		return res.Voices[0].ID, nil
-// 	}
-
-// 	log.Println("Error getting last generated voice id, no voices found")
-// 	return "", nil
-// }
-
-func DownloadVoice(voiceId string) ([]byte, error) {
-	env, err := config.ParseEnv()
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest(
-		"GET",
-		fmt.Sprintf("%s/download-voice/%s", env.MicmonsterApiURL, voiceId),
-		nil,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := attachCookiesToRequest(req); err != nil {
-		log.Println("Error downloading voice, attaching cookies", err)
-		return nil, err
-	}
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	return io.ReadAll(resp.Body)
-}
+const (
+	VoiceDownloadTypeMP3 VoiceDownloadType = "mp3"
+	VoiceDownloadTypeWAV VoiceDownloadType = "wav"
+)
 
 func attachCookiesToRequest(req *http.Request) error {
 	cookies, err := getCookies()
@@ -489,3 +408,125 @@ func getCookies() ([]*http.Cookie, error) {
 		{Name: "cpass", Value: env.MicmonsterCPASS},
 	}, nil
 }
+
+func test() {
+	url := "https://app.micmonster.com/downloads/5473291?downloadType=wav"
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Println("Error creating request:", err)
+		return
+	}
+	req.Header.Set("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
+	req.Header.Set("accept-language", "en-US,en;q=0.9")
+	req.Header.Set("sec-ch-ua", `"Chromium";v="130", "Google Chrome";v="130", "Not?A_Brand";v="99"`)
+	req.Header.Set("sec-ch-ua-mobile", "?0")
+	req.Header.Set("sec-ch-ua-platform", `"Windows"`)
+	req.Header.Set("sec-fetch-dest", "document")
+	req.Header.Set("sec-fetch-mode", "navigate")
+	req.Header.Set("sec-fetch-site", "same-origin")
+	req.Header.Set("sec-fetch-user", "?1")
+	req.Header.Set("upgrade-insecure-requests", "1")
+	req.Header.Set("cookie", "")
+	req.Header.Set("Referer", "https://app.micmonster.com/project-detail/289da212-ce9d454c-b9c1dcad-ecee23a1")
+	req.Header.Set("Referrer-Policy", "strict-origin-when-cross-origin")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		log.Println("Error sending request:", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			log.Println("Error reading response body:", err)
+			return
+		}
+		log.Println("Response body:", string(body))
+		log.Println("Failed to download file, status code:", resp.StatusCode)
+		return
+	}
+
+	outFile, err := os.Create("downloaded_audio.wav")
+	if err != nil {
+		log.Println("Error creating file:", err)
+		return
+	}
+	defer outFile.Close()
+
+	_, err = io.Copy(outFile, resp.Body)
+	if err != nil {
+		log.Println("Error copying response body to file:", err)
+		return
+	}
+
+	log.Println("Audio file downloaded successfully")
+}
+
+// func DownloadVoice(voiceID, savePath string, voiceDownloadType VoiceDownloadType) error {
+// 	env, err := config.ParseEnv()
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	req, err := http.NewRequest(
+// 		"GET",
+// 		fmt.Sprintf("%s/downloads/%s?downloadType=%s", env.MicmonsterApiURL, voiceID, string(voiceDownloadType)),
+// 		nil,
+// 	)
+
+// 	if err != nil {
+// 		log.Println("Error creating request:", err)
+// 		return err
+// 	}
+
+// 	req.Header.Set("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
+// 	req.Header.Set("accept-language", "en-US,en;q=0.9")
+// 	req.Header.Set("sec-ch-ua", `"Chromium";v="130", "Google Chrome";v="130", "Not?A_Brand";v="99"`)
+// 	req.Header.Set("sec-ch-ua-mobile", "?0")
+// 	req.Header.Set("sec-ch-ua-platform", `"Windows"`)
+// 	req.Header.Set("sec-fetch-dest", "document")
+// 	req.Header.Set("sec-fetch-mode", "navigate")
+// 	req.Header.Set("sec-fetch-site", "same-origin")
+// 	req.Header.Set("sec-fetch-user", "?1")
+// 	req.Header.Set("upgrade-insecure-requests", "1")
+// 	req.Header.Set("cookie", )
+// 	req.Header.Set("Referer", "https://app.micmonster.com/project-detail/289da212-ce9d454c-b9c1dcad-ecee23a1")
+// 	req.Header.Set("Referrer-Policy", "strict-origin-when-cross-origin")
+
+// 	resp, err := http.DefaultClient.Do(req)
+// 	if err != nil {
+// 		log.Println("Error sending request:", err)
+// 		return err
+// 	}
+// 	defer resp.Body.Close()
+
+// 	if resp.StatusCode != http.StatusOK {
+// 		body, err := io.ReadAll(resp.Body)
+// 		if err != nil {
+// 			log.Println("Error reading response body:", err)
+// 			return err
+// 		}
+// 		log.Println("Response body:", string(body))
+// 		log.Println("Failed to download file, status code:", resp.StatusCode)
+// 		return err
+// 	}
+
+// 	outFile, err := os.Create(savePath)
+// 	if err != nil {
+// 		log.Println("Error creating file:", err)
+// 		return err
+// 	}
+// 	defer outFile.Close()
+
+// 	_, err = io.Copy(outFile, resp.Body)
+// 	if err != nil {
+// 		log.Println("Error copying response body to file:", err)
+// 		return err
+// 	}
+
+// 	log.Println("Audio file downloaded successfully")
+
+// 	return nil
+// }
