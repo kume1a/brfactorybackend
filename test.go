@@ -426,9 +426,10 @@ func test() {
 	req.Header.Set("sec-fetch-site", "same-origin")
 	req.Header.Set("sec-fetch-user", "?1")
 	req.Header.Set("upgrade-insecure-requests", "1")
-	req.Header.Set("cookie", "")
 	req.Header.Set("Referer", "https://app.micmonster.com/project-detail/289da212-ce9d454c-b9c1dcad-ecee23a1")
 	req.Header.Set("Referrer-Policy", "strict-origin-when-cross-origin")
+
+	attachCookiesToRequest(req)
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
