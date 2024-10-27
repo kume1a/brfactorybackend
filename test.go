@@ -1,22 +1,28 @@
 package main
 
 import (
+	"crypto/sha256"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/exec"
 	"regexp"
 	"strconv"
+	"strings"
+	"time"
 
 	"brfactorybackend/internal/config"
 	"bytes"
 	"encoding/json"
-	"io"
 	"net/http"
 	"net/url"
 
 	"github.com/google/uuid"
+
+	"crypto/hmac"
+	"encoding/hex"
 )
 
 type MicmonsterVoiceDTO struct {
@@ -173,16 +179,12 @@ func main() {
 	// log.Println("sentences", sentences)
 	// log.Println("len", len(sentences))
 
-	// lastGeneratedVoiceID, err := GetLastGeneratedVoiceID()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+	lastGeneratedAudio, err := GetLastGeneratedVoice()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	// log.Println("lastGeneratedVoiceID", lastGeneratedVoiceID)
-
-	// DownloadVoice(lastGeneratedVoiceID, "audio.mp3", VoiceDownloadTypeMP3)
-
-	test()
+	DownloadAudio(lastGeneratedAudio.Audio, "audio.mp3")
 
 	// var durations []float64
 	// var audioFiles []string
@@ -317,16 +319,16 @@ type MicmonsterListVoicesBodyDTO struct {
 	Timezone       string `json:"timezone"`
 }
 
-func GetLastGeneratedVoiceID() (string, error) {
+func GetLastGeneratedVoice() (MicmonsterVoiceDTO, error) {
 	env, err := config.ParseEnv()
 	if err != nil {
-		return "", err
+		return MicmonsterVoiceDTO{}, err
 	}
 
 	cookies, err := getCookies()
 	if err != nil {
 		log.Println("Error getting last generated voice id, getting cookies", err)
-		return "", err
+		return MicmonsterVoiceDTO{}, err
 	}
 
 	data := url.Values{}
@@ -342,7 +344,7 @@ func GetLastGeneratedVoiceID() (string, error) {
 	req, err := http.NewRequest("POST", env.MicmonsterApiURL+"/list-voices", bytes.NewBufferString(data.Encode()))
 	if err != nil {
 		log.Println("Error getting last generated voice id, creating request", err)
-		return "", err
+		return MicmonsterVoiceDTO{}, err
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
@@ -353,27 +355,27 @@ func GetLastGeneratedVoiceID() (string, error) {
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		log.Println("Error getting last generated voice id, sending request", err)
-		return "", err
+		return MicmonsterVoiceDTO{}, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		log.Println("invalid status code", resp.StatusCode, "response:", resp.Status)
-		return "", errors.New("invalid status code " + strconv.Itoa(resp.StatusCode))
+		return MicmonsterVoiceDTO{}, errors.New("invalid status code " + strconv.Itoa(resp.StatusCode))
 	}
 
 	var res MicmonsterListVoicesDTO
 	if err := json.NewDecoder(resp.Body).Decode(&res); err != nil {
 		log.Println("Error decoding response", err)
-		return "", err
+		return MicmonsterVoiceDTO{}, err
 	}
 
 	if len(res.Voices) > 0 {
-		return res.Voices[0].ID, nil
+		return res.Voices[0], nil
 	}
 
 	log.Println("Error getting last generated voice id, no voices found")
-	return "", nil
+	return MicmonsterVoiceDTO{}, nil
 }
 
 type VoiceDownloadType string
@@ -409,125 +411,103 @@ func getCookies() ([]*http.Cookie, error) {
 	}, nil
 }
 
-func test() {
-	url := "https://app.micmonster.com/downloads/5473291?downloadType=wav"
-	req, err := http.NewRequest("GET", url, nil)
+func DownloadAudio(audioPath, filename string) error {
+	env, err := config.ParseEnv()
 	if err != nil {
-		log.Println("Error creating request:", err)
-		return
+		log.Fatal(err)
 	}
-	req.Header.Set("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
-	req.Header.Set("accept-language", "en-US,en;q=0.9")
-	req.Header.Set("sec-ch-ua", `"Chromium";v="130", "Google Chrome";v="130", "Not?A_Brand";v="99"`)
-	req.Header.Set("sec-ch-ua-mobile", "?0")
-	req.Header.Set("sec-ch-ua-platform", `"Windows"`)
-	req.Header.Set("sec-fetch-dest", "document")
-	req.Header.Set("sec-fetch-mode", "navigate")
-	req.Header.Set("sec-fetch-site", "same-origin")
-	req.Header.Set("sec-fetch-user", "?1")
-	req.Header.Set("upgrade-insecure-requests", "1")
-	req.Header.Set("Referer", "https://app.micmonster.com/project-detail/289da212-ce9d454c-b9c1dcad-ecee23a1")
-	req.Header.Set("Referrer-Policy", "strict-origin-when-cross-origin")
 
-	attachCookiesToRequest(req)
+	host := "micmonsterlive.s3.us-east-2.amazonaws.com"
+	region := "us-east-2"
+	service := "s3"
+	expires := 1200
 
-	resp, err := http.DefaultClient.Do(req)
+	t := time.Now().UTC()
+	date := t.Format("20060102")
+	amzDate := t.Format("20060102T150405Z")
+
+	canonicalURI := "/uploads/audio/" + audioPath
+	canonicalQueryString := "X-Amz-Algorithm=AWS4-HMAC-SHA256"
+	canonicalQueryString += "&X-Amz-Credential=" + url.QueryEscape(env.MicmonsterAWSAccessKey+"/"+date+"/"+region+"/"+service+"/aws4_request")
+	canonicalQueryString += "&X-Amz-Date=" + amzDate
+	canonicalQueryString += "&X-Amz-Expires=" + fmt.Sprintf("%d", expires)
+	canonicalQueryString += "&X-Amz-SignedHeaders=host"
+
+	canonicalHeaders := "host:" + host + "\n"
+	signedHeaders := "host"
+	payloadHash := "UNSIGNED-PAYLOAD"
+
+	canonicalRequest := strings.Join([]string{
+		"GET",
+		canonicalURI,
+		canonicalQueryString,
+		canonicalHeaders,
+		signedHeaders,
+		payloadHash,
+	}, "\n")
+
+	// Generate the string to sign
+	algorithm := "AWS4-HMAC-SHA256"
+	credentialScope := date + "/" + region + "/" + service + "/" + "aws4_request"
+	stringToSign := strings.Join([]string{
+		algorithm,
+		amzDate,
+		credentialScope,
+		hex.EncodeToString(hashSHA256([]byte(canonicalRequest))),
+	}, "\n")
+
+	// Generate the signing key
+	signingKey := getSignatureKey(env.MicmonsterAWSSecretKey, date, region, service)
+
+	// Generate the signature
+	signature := hex.EncodeToString(hmacSHA256(signingKey, stringToSign))
+
+	// Create the final URL
+	finalURL := fmt.Sprintf("https://%s%s?%s&X-Amz-Signature=%s", host, canonicalURI, canonicalQueryString, signature)
+	fmt.Println("Generated URL:", finalURL)
+
+	resp, err := http.Get(finalURL)
 	if err != nil {
-		log.Println("Error sending request:", err)
-		return
+		log.Println("Error getting file", err)
+		return err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			log.Println("Error reading response body:", err)
-			return
-		}
-		log.Println("Response body:", string(body))
-		log.Println("Failed to download file, status code:", resp.StatusCode)
-		return
+		log.Println("Error downloading file", resp.Status)
+		return fmt.Errorf("failed to download file: %s", resp.Status)
 	}
 
-	outFile, err := os.Create("downloaded_audio.wav")
+	out, err := os.Create(filename)
 	if err != nil {
-		log.Println("Error creating file:", err)
-		return
+		log.Println("Error creating file", err)
+		return err
 	}
-	defer outFile.Close()
+	defer out.Close()
 
-	_, err = io.Copy(outFile, resp.Body)
+	_, err = io.Copy(out, resp.Body)
 	if err != nil {
-		log.Println("Error copying response body to file:", err)
-		return
+		return err
 	}
 
-	log.Println("Audio file downloaded successfully")
+	return nil
 }
 
-// func DownloadVoice(voiceID, savePath string, voiceDownloadType VoiceDownloadType) error {
-// 	env, err := config.ParseEnv()
-// 	if err != nil {
-// 		return err
-// 	}
+func hashSHA256(data []byte) []byte {
+	hash := sha256.Sum256(data)
+	return hash[:]
+}
 
-// 	req, err := http.NewRequest(
-// 		"GET",
-// 		fmt.Sprintf("%s/downloads/%s?downloadType=%s", env.MicmonsterApiURL, voiceID, string(voiceDownloadType)),
-// 		nil,
-// 	)
+func hmacSHA256(key []byte, data string) []byte {
+	h := hmac.New(sha256.New, key)
+	h.Write([]byte(data))
+	return h.Sum(nil)
+}
 
-// 	if err != nil {
-// 		log.Println("Error creating request:", err)
-// 		return err
-// 	}
-
-// 	req.Header.Set("accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
-// 	req.Header.Set("accept-language", "en-US,en;q=0.9")
-// 	req.Header.Set("sec-ch-ua", `"Chromium";v="130", "Google Chrome";v="130", "Not?A_Brand";v="99"`)
-// 	req.Header.Set("sec-ch-ua-mobile", "?0")
-// 	req.Header.Set("sec-ch-ua-platform", `"Windows"`)
-// 	req.Header.Set("sec-fetch-dest", "document")
-// 	req.Header.Set("sec-fetch-mode", "navigate")
-// 	req.Header.Set("sec-fetch-site", "same-origin")
-// 	req.Header.Set("sec-fetch-user", "?1")
-// 	req.Header.Set("upgrade-insecure-requests", "1")
-// 	req.Header.Set("cookie", )
-// 	req.Header.Set("Referer", "https://app.micmonster.com/project-detail/289da212-ce9d454c-b9c1dcad-ecee23a1")
-// 	req.Header.Set("Referrer-Policy", "strict-origin-when-cross-origin")
-
-// 	resp, err := http.DefaultClient.Do(req)
-// 	if err != nil {
-// 		log.Println("Error sending request:", err)
-// 		return err
-// 	}
-// 	defer resp.Body.Close()
-
-// 	if resp.StatusCode != http.StatusOK {
-// 		body, err := io.ReadAll(resp.Body)
-// 		if err != nil {
-// 			log.Println("Error reading response body:", err)
-// 			return err
-// 		}
-// 		log.Println("Response body:", string(body))
-// 		log.Println("Failed to download file, status code:", resp.StatusCode)
-// 		return err
-// 	}
-
-// 	outFile, err := os.Create(savePath)
-// 	if err != nil {
-// 		log.Println("Error creating file:", err)
-// 		return err
-// 	}
-// 	defer outFile.Close()
-
-// 	_, err = io.Copy(outFile, resp.Body)
-// 	if err != nil {
-// 		log.Println("Error copying response body to file:", err)
-// 		return err
-// 	}
-
-// 	log.Println("Audio file downloaded successfully")
-
-// 	return nil
-// }
+func getSignatureKey(secretKey, date, region, service string) []byte {
+	kDate := hmacSHA256([]byte("AWS4"+secretKey), date)
+	kRegion := hmacSHA256(kDate, region)
+	kService := hmacSHA256(kRegion, service)
+	kSigning := hmacSHA256(kService, "aws4_request")
+	return kSigning
+}

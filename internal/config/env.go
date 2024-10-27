@@ -48,6 +48,8 @@ type EnvVariables struct {
 	MicmonsterCPASS          string
 	MicmonsterCISession      string
 	MicmonsterCharacterLimit int64
+	MicmonsterAWSAccessKey   string
+	MicmonsterAWSSecretKey   string
 }
 
 func ParseEnv() (*EnvVariables, error) {
@@ -106,6 +108,16 @@ func ParseEnv() (*EnvVariables, error) {
 		return nil, err
 	}
 
+	micmonsterAWSAccessKey, err := getEnv("MICMONSTER_AWS_ACCESS_KEY")
+	if err != nil {
+		return nil, err
+	}
+
+	micmonsterAWSSecretKey, err := getEnv("MICMONSTER_AWS_SECRET_KEY")
+	if err != nil {
+		return nil, err
+	}
+
 	return &EnvVariables{
 		IsDevelopment:            environment == "development",
 		IsProduction:             environment == "production",
@@ -119,6 +131,8 @@ func ParseEnv() (*EnvVariables, error) {
 		MicmonsterCPASS:          micmonsterCPASS,
 		MicmonsterCISession:      micmonsterCISession,
 		MicmonsterCharacterLimit: micmonsterCharacterLimit,
+		MicmonsterAWSAccessKey:   micmonsterAWSAccessKey,
+		MicmonsterAWSSecretKey:   micmonsterAWSSecretKey,
 	}, nil
 }
 
