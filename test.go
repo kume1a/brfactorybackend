@@ -26,7 +26,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type MicmonsterVoiceDTO struct {
+type MicmonsterAudioDTO struct {
 	ID             string      `json:"id"`
 	UserID         string      `json:"user_id"`
 	ProjectID      string      `json:"project_id"`
@@ -50,8 +50,8 @@ type MicmonsterVoiceDTO struct {
 	IsPending      int         `json:"is_pending"`
 }
 
-type MicmonsterListVoicesDTO struct {
-	Voices       []MicmonsterVoiceDTO `json:"voices"`
+type MicmonsterListAudiosDTO struct {
+	Voices       []MicmonsterAudioDTO `json:"voices"`
 	TotalRecords int                  `json:"totalRecords"`
 	TotalPages   int                  `json:"totalPages"`
 	CurrentPage  int                  `json:"currentPage"`
@@ -172,16 +172,7 @@ func main() {
 	story := "Nursing student. Born and raised on a farm. Twenty-eight years old. Slim. Defensive posture and a soft voice (low self-esteem). Sitting in a shitty bar at 8 PM on a Wednesday night. Physically, she looked a lot like the last one.\nShe was perfect.\nAfter some small talk and four cans of beer, her voice softens. Her cheeks flush, and I can sense the sexual tension building. I shift to the offensive, leaning closer and letting my hand brush her knee and shoulder. I wait for a reaction. It comes in the form of a shy glance and a slight openness to more physical contact.\nEverything was going according to plan. In fact, I hadn’t expected things to flow this smoothly. Two out of the last three had required more than one encounter to reach this level of intimacy.\nI invite her to leave the bar and grab a quick bite to eat. I tell her I know a great spot nearby where we can get something fast before calling it a night. I feel her hesitation for a moment, probably weighing the risks of saying yes. She mentions she has class early tomorrow, but I reassure her—it won’t take long. The place is just fifteen minutes away. Convinced, she follows me out and into my car.\nWe laugh and chat during the drive. She only realizes we’ve entered the park about ten minutes in and asks if we’re close to the destination. I assure her that we are—it’s just up ahead. I just took a shortcut.\nWe’re now deep inside the park, where the lights become sparse and then disappear completely. It’s the perfect place—one I know like the back of my hand. I had practiced this route several times to ensure everything would run smoothly and avoid any unexpected encounters. All the others ended up here too.\nI pull over at the pre-planned spot and ask her to step out of the car. Confusion spreads across her face as she senses something is wrong, and her body stiffens. I open the door and yank her out, and she collapses onto the grass.\nGrabbing her by the neck, I steer her along the path. She starts begging for mercy, sobbing uncontrollably now. I ignore her and continue down the short trail toward my usual location.\nOnce there, I throw her to the ground and tie her hands with the rope I’d left ready. As I reach for the knife I had buried nearby, a sharp, burning pain stabs my side, and I lose balance.\nOn the ground, I realize I’ve been shot in the thigh. A man steps out from the shadows with a shotgun in hand and unties the girl. They embrace, and I hear him say, \"This is what Catherine would have wanted. Now she can rest in peace—you were perfect.”. The resemblance hit me like a jolt, and in that moment, I remembered—Catherine, the last girl.\nHe reloads the shotgun and steps toward me. I try to reason with him, plead for calm, explaining that it’s all a misunderstanding. But the cold steel of the barrel presses against my forehead."
 	sentences := splitTextIntoSentences(story)
 
-	log.Println("sentences", sentences)
-	log.Println("len", len(sentences))
-
-	_, err := GenerateVoice(sentences[0])
-	if err != nil {
-		fmt.Println("Error generating audio:", err)
-		return
-	}
-
-	return
+	log.Println("sentences len", len(sentences))
 
 	var durations []float64
 	var audioFiles []string
@@ -190,16 +181,15 @@ func main() {
 		filename := "audio_" + strconv.Itoa(i+1) + ".mp3"
 		audioFiles = append(audioFiles, filename)
 
-		log.Println("generating voice for sentence", sentence)
-		log.Println("filename", filename)
+		log.Println("generating audio, filename=" + filename + ", text=" + sentence)
 
-		_, err := GenerateVoice(sentence)
+		_, err := GenerateAudio(sentence)
 		if err != nil {
 			fmt.Println("Error generating audio:", err)
 			return
 		}
 
-		lastGeneratedAudio, err := GetLastGeneratedVoice()
+		lastGeneratedAudio, err := GetLastGeneratedAudio()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -212,8 +202,6 @@ func main() {
 			return
 		}
 		durations = append(durations, duration)
-
-		break
 	}
 
 	log.Println("durations", durations)
@@ -235,7 +223,7 @@ func main() {
 	// }
 }
 
-func GenerateVoice(text string) (bool, error) {
+func GenerateAudio(text string) (bool, error) {
 	env, err := config.ParseEnv()
 	if err != nil {
 		return false, err
@@ -299,17 +287,17 @@ func GenerateVoice(text string) (bool, error) {
 	json.NewDecoder(res.Body).Decode(&result)
 
 	if status, ok := result["status"].(string); ok && status == "success" {
-		log.Println("Success generating voice")
+		log.Println("Success generating audio")
 		return true, nil
 	}
 
-	log.Println("Error generating voice, status not success")
-	return false, errors.New("error generating voice, status not success")
+	log.Println("Error generating audio, status not success")
+	return false, errors.New("error generating audio, status not success")
 }
 
-// func (mc *MicmonsterClient) DeleteVoice(voiceId string) error {
+// func (mc *MicmonsterClient) DeleteAudio(audioID string) error {
 // 	data := url.Values{}
-// 	data.Set("id", voiceId)
+// 	data.Set("id", audioID)
 
 // 	req, err := http.NewRequest("POST", mc.environmentVariableProvider.MicMonsterApiUrl()+"/delete-voice", bytes.NewBufferString(data.Encode()))
 // 	if err != nil {
@@ -323,7 +311,7 @@ func GenerateVoice(text string) (bool, error) {
 // 	return err
 // }
 
-type MicmonsterListVoicesBodyDTO struct {
+type MicmonsterListAudiosBodyDTO struct {
 	Start          string `json:"start"`
 	Limit          string `json:"limit"`
 	SortBy         string `json:"sortBy"`
@@ -334,16 +322,16 @@ type MicmonsterListVoicesBodyDTO struct {
 	Timezone       string `json:"timezone"`
 }
 
-func GetLastGeneratedVoice() (MicmonsterVoiceDTO, error) {
+func GetLastGeneratedAudio() (MicmonsterAudioDTO, error) {
 	env, err := config.ParseEnv()
 	if err != nil {
-		return MicmonsterVoiceDTO{}, err
+		return MicmonsterAudioDTO{}, err
 	}
 
 	cookies, err := getCookies()
 	if err != nil {
-		log.Println("Error getting last generated voice id, getting cookies", err)
-		return MicmonsterVoiceDTO{}, err
+		log.Println("Error getting last generated audio id, getting cookies", err)
+		return MicmonsterAudioDTO{}, err
 	}
 
 	data := url.Values{}
@@ -358,8 +346,8 @@ func GetLastGeneratedVoice() (MicmonsterVoiceDTO, error) {
 
 	req, err := http.NewRequest("POST", env.MicmonsterApiURL+"/list-voices", bytes.NewBufferString(data.Encode()))
 	if err != nil {
-		log.Println("Error getting last generated voice id, creating request", err)
-		return MicmonsterVoiceDTO{}, err
+		log.Println("Error getting last generated audio id, creating request", err)
+		return MicmonsterAudioDTO{}, err
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
@@ -369,36 +357,29 @@ func GetLastGeneratedVoice() (MicmonsterVoiceDTO, error) {
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		log.Println("Error getting last generated voice id, sending request", err)
-		return MicmonsterVoiceDTO{}, err
+		log.Println("Error getting last generated audio id, sending request", err)
+		return MicmonsterAudioDTO{}, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		log.Println("invalid status code", resp.StatusCode, "response:", resp.Status)
-		return MicmonsterVoiceDTO{}, errors.New("invalid status code " + strconv.Itoa(resp.StatusCode))
+		return MicmonsterAudioDTO{}, errors.New("invalid status code " + strconv.Itoa(resp.StatusCode))
 	}
 
-	var res MicmonsterListVoicesDTO
+	var res MicmonsterListAudiosDTO
 	if err := json.NewDecoder(resp.Body).Decode(&res); err != nil {
 		log.Println("Error decoding response", err)
-		return MicmonsterVoiceDTO{}, err
+		return MicmonsterAudioDTO{}, err
 	}
 
 	if len(res.Voices) > 0 {
 		return res.Voices[0], nil
 	}
 
-	log.Println("Error getting last generated voice id, no voices found")
-	return MicmonsterVoiceDTO{}, nil
+	log.Println("Error getting last generated audio id, no audios found")
+	return MicmonsterAudioDTO{}, nil
 }
-
-type VoiceDownloadType string
-
-const (
-	VoiceDownloadTypeMP3 VoiceDownloadType = "mp3"
-	VoiceDownloadTypeWAV VoiceDownloadType = "wav"
-)
 
 func attachCookiesToRequest(req *http.Request) error {
 	cookies, err := getCookies()
