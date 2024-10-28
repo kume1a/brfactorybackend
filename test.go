@@ -65,15 +65,16 @@ type MicmonsterListVoicesDTO struct {
 	} `json:"data"`
 }
 
-// Step 1: Split text into sentences and handle long sentences
 func splitTextIntoSentences(text string) []string {
+	longSentenceThreshold := 200
+
 	re := regexp.MustCompile(`(?m)([^.!?]+[.!?]*)`)
 	sentences := re.FindAllString(text, -1)
 
 	var result []string
 	for _, sentence := range sentences {
-		if len(sentence) > 200 { // Assuming 200 characters as the threshold for a long sentence
-			parts := splitLongSentence(sentence, 200)
+		if len(sentence) > longSentenceThreshold {
+			parts := splitLongSentence(sentence, longSentenceThreshold)
 			result = append(result, parts...)
 		} else {
 			result = append(result, sentence)
@@ -82,7 +83,6 @@ func splitTextIntoSentences(text string) []string {
 	return result
 }
 
-// Helper function to split long sentences into smaller parts
 func splitLongSentence(sentence string, maxLength int) []string {
 	words := regexp.MustCompile(`\s+`).Split(sentence, -1)
 	var parts []string
@@ -105,7 +105,6 @@ func splitLongSentence(sentence string, maxLength int) []string {
 	return parts
 }
 
-// Step 3: Get duration of audio file
 func getAudioDuration(audioFile string) (float64, error) {
 	cmd := exec.Command("ffmpeg", "-i", audioFile, "-f", "null", "-")
 	output, err := cmd.CombinedOutput()
@@ -113,7 +112,6 @@ func getAudioDuration(audioFile string) (float64, error) {
 		return 0, err
 	}
 
-	// Use regex to extract the duration from the ffmpeg output
 	re := regexp.MustCompile(`Duration: (\d+):(\d+):(\d+)\.(\d+)`)
 	matches := re.FindStringSubmatch(string(output))
 	if len(matches) != 5 {
@@ -129,7 +127,6 @@ func getAudioDuration(audioFile string) (float64, error) {
 	return duration, nil
 }
 
-// Step 4: Create SRT file
 func createSRTFile(sentences []string, durations []float64, srtFile string) error {
 	file, err := os.Create(srtFile)
 	if err != nil {
@@ -149,7 +146,6 @@ func createSRTFile(sentences []string, durations []float64, srtFile string) erro
 	return nil
 }
 
-// Format time for SRT subtitles
 func formatTimeForSRT(seconds float64) string {
 	hrs := int(seconds / 3600)
 	mins := int(seconds/60) % 60
@@ -158,7 +154,6 @@ func formatTimeForSRT(seconds float64) string {
 	return fmt.Sprintf("%02d:%02d:%02d,%03d", hrs, mins, secs, millis)
 }
 
-// Step 5: Stitch video with audio and subtitles
 func stitchVideoWithAudioAndSubtitles(videoFile string, audioFiles []string, srtFile string, outputFile string) error {
 	audioInputs := []string{}
 	for _, audioFile := range audioFiles {
