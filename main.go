@@ -16,7 +16,7 @@ import (
 	_ "brfactorybackend/migrations"
 )
 
-func main1() {
+func main10() {
 	app := pocketbase.New()
 
 	// err := config.LoadEnv(app)
