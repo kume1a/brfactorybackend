@@ -223,15 +223,15 @@ func main() {
 
 	durations := []float64{}
 	audioFiles := []string{
-		"data/audio_1.mp3", "data/audio_2.mp3", "data/audio_3.mp3", "data/audio_4.mp3", "data/audio_5.mp3",
-		"data/audio_6.mp3", "data/audio_7.mp3", "data/audio_8.mp3", "data/audio_9.mp3", "data/audio_10.mp3",
-		"data/audio_11.mp3", "data/audio_12.mp3", "data/audio_13.mp3", "data/audio_14.mp3", "data/audio_15.mp3",
-		"data/audio_16.mp3", "data/audio_17.mp3", "data/audio_18.mp3", "data/audio_19.mp3", "data/audio_20.mp3",
-		"data/audio_21.mp3", "data/audio_22.mp3", "data/audio_23.mp3", "data/audio_24.mp3", "data/audio_25.mp3",
-		"data/audio_26.mp3", "data/audio_27.mp3", "data/audio_28.mp3", "data/audio_29.mp3", "data/audio_30.mp3",
-		"data/audio_31.mp3", "data/audio_32.mp3", "data/audio_33.mp3", "data/audio_34.mp3", "data/audio_35.mp3",
-		"data/audio_36.mp3", "data/audio_37.mp3", "data/audio_38.mp3", "data/audio_39.mp3", "data/audio_40.mp3",
-		"data/audio_41.mp3", "data/audio_42.mp3", "data/audio_43.mp3", "data/audio_44.mp3",
+		"data/audio_1_1_5x.mp3", "data/audio_2_1_5x.mp3", "data/audio_3_1_5x.mp3", "data/audio_4_1_5x.mp3", "data/audio_5_1_5x.mp3",
+		"data/audio_6_1_5x.mp3", "data/audio_7_1_5x.mp3", "data/audio_8_1_5x.mp3", "data/audio_9_1_5x.mp3", "data/audio_10_1_5x.mp3",
+		"data/audio_11_1_5x.mp3", "data/audio_12_1_5x.mp3", "data/audio_13_1_5x.mp3", "data/audio_14_1_5x.mp3", "data/audio_15_1_5x.mp3",
+		"data/audio_16_1_5x.mp3", "data/audio_17_1_5x.mp3", "data/audio_18_1_5x.mp3", "data/audio_19_1_5x.mp3", "data/audio_20_1_5x.mp3",
+		"data/audio_21_1_5x.mp3", "data/audio_22_1_5x.mp3", "data/audio_23_1_5x.mp3", "data/audio_24_1_5x.mp3", "data/audio_25_1_5x.mp3",
+		"data/audio_26_1_5x.mp3", "data/audio_27_1_5x.mp3", "data/audio_28_1_5x.mp3", "data/audio_29_1_5x.mp3", "data/audio_30_1_5x.mp3",
+		"data/audio_31_1_5x.mp3", "data/audio_32_1_5x.mp3", "data/audio_33_1_5x.mp3", "data/audio_34_1_5x.mp3", "data/audio_35_1_5x.mp3",
+		"data/audio_36_1_5x.mp3", "data/audio_37_1_5x.mp3", "data/audio_38_1_5x.mp3", "data/audio_39_1_5x.mp3", "data/audio_40_1_5x.mp3",
+		"data/audio_41_1_5x.mp3", "data/audio_42_1_5x.mp3", "data/audio_43_1_5x.mp3", "data/audio_44_1_5x.mp3",
 	}
 
 	for _, audioFile := range audioFiles {
@@ -273,7 +273,6 @@ func main() {
 	defer file.Close()
 
 	timestampRegex := regexp.MustCompile(`([0-9]{2}):([0-9]{2}):([0-9]{2}),([0-9]{3})`)
-
 	inputFiles := []string{"-i", backgroundVideo}
 	filterComplex := ""
 	audioIndex := 1
@@ -281,7 +280,6 @@ func main() {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
-
 		if matches := timestampRegex.FindStringSubmatch(line); len(matches) == 5 {
 			hours, _ := strconv.Atoi(matches[1])
 			minutes, _ := strconv.Atoi(matches[2])
@@ -290,7 +288,7 @@ func main() {
 			delay := (hours*3600+minutes*60+seconds)*1000 + milliseconds
 
 			filterComplex += fmt.Sprintf("[%d]adelay=%d|%d[a%d]; ", audioIndex, delay, delay, audioIndex)
-			inputFiles = append(inputFiles, "-i", fmt.Sprintf("data/audio_%d.mp3", audioIndex))
+			inputFiles = append(inputFiles, "-i", fmt.Sprintf("data/audio_%d_1_5x.mp3", audioIndex))
 			audioIndex++
 		}
 	}
@@ -308,7 +306,6 @@ func main() {
 
 	subtitleFilter := fmt.Sprintf("subtitles='%s':force_style='FontSize=16,Bold=1,Alignment=10,MarginV=0,OutlineColour=&H000000&,Outline=1'", srtFile)
 	videoFilter := "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920"
-
 	finalFilter := fmt.Sprintf("%s,%s", videoFilter, subtitleFilter)
 	ffmpegArgs := append(inputFiles, "-filter_complex", filterComplex, "-vf", finalFilter, "-map", "0:v", "-map", "[audio]", "-shortest", outputVideo)
 
