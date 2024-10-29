@@ -283,10 +283,16 @@ func main() {
 
 	// Updated subtitle filter with larger font size and centering
 	// Here we specify y=(h-th)/2 to vertically center the text
-	subtitleFilter := fmt.Sprintf("subtitles='%s':force_style='FontSize=24,Alignment=2'", subtitleFile)
+	subtitleFilter := fmt.Sprintf("subtitles='%s':force_style='FontSize=24,Alignment=6,MarginV=0'", subtitleFile)
+
+	// Resize and center crop the background video to 9:16 aspect ratio
+	videoFilter := "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920"
+
+	// Combine video and subtitle filters
+	finalFilter := fmt.Sprintf("%s,%s", videoFilter, subtitleFilter)
 
 	// Final ffmpeg command arguments
-	ffmpegArgs := append(inputFiles, "-filter_complex", filterComplex, "-vf", subtitleFilter, "-map", "0:v", "-map", "[audio]", "-shortest", outputVideo)
+	ffmpegArgs := append(inputFiles, "-filter_complex", filterComplex, "-vf", finalFilter, "-map", "0:v", "-map", "[audio]", "-shortest", outputVideo)
 
 	// Print the command to debug
 	fmt.Println("Running ffmpeg command:")
