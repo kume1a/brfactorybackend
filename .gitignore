@@ -6,4 +6,4 @@ tmp
 .env*
 !.env.example
 
-audios
+data

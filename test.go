@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"crypto/sha256"
 	"errors"
 	"fmt"
@@ -157,67 +158,148 @@ func stitchVideoWithAudioAndSubtitles(videoFile string, audioFiles []string, srt
 		audioInputs = append(audioInputs, "-i", audioFile)
 	}
 
-	cmd := exec.Command("ffmpeg", append(audioInputs, "-i", videoFile, "-vf", fmt.Sprintf("subtitles=%s", srtFile), outputFile)...)
+	commandArgs := append(audioInputs, "-i", videoFile, "-vf", fmt.Sprintf("subtitles=%s", srtFile), outputFile)
+
+	log.Println("ffmpeg command", commandArgs)
+
+	cmd := exec.Command("ffmpeg", commandArgs...)
 	return cmd.Run()
 }
 
+// func main() {
+// 	if err := config.LoadEnv(); err != nil {
+// 		log.Fatal("Couldn't load env vars, returning")
+// 	}
+
+// 	story := "Nursing student. Born and raised on a farm. Twenty-eight years old. Slim. Defensive posture and a soft voice (low self-esteem). Sitting in a shitty bar at 8 PM on a Wednesday night. Physically, she looked a lot like the last one.\nShe was perfect.\nAfter some small talk and four cans of beer, her voice softens. Her cheeks flush, and I can sense the sexual tension building. I shift to the offensive, leaning closer and letting my hand brush her knee and shoulder. I wait for a reaction. It comes in the form of a shy glance and a slight openness to more physical contact.\nEverything was going according to plan. In fact, I hadn’t expected things to flow this smoothly. Two out of the last three had required more than one encounter to reach this level of intimacy.\nI invite her to leave the bar and grab a quick bite to eat. I tell her I know a great spot nearby where we can get something fast before calling it a night. I feel her hesitation for a moment, probably weighing the risks of saying yes. She mentions she has class early tomorrow, but I reassure her—it won’t take long. The place is just fifteen minutes away. Convinced, she follows me out and into my car.\nWe laugh and chat during the drive. She only realizes we’ve entered the park about ten minutes in and asks if we’re close to the destination. I assure her that we are—it’s just up ahead. I just took a shortcut.\nWe’re now deep inside the park, where the lights become sparse and then disappear completely. It’s the perfect place—one I know like the back of my hand. I had practiced this route several times to ensure everything would run smoothly and avoid any unexpected encounters. All the others ended up here too.\nI pull over at the pre-planned spot and ask her to step out of the car. Confusion spreads across her face as she senses something is wrong, and her body stiffens. I open the door and yank her out, and she collapses onto the grass.\nGrabbing her by the neck, I steer her along the path. She starts begging for mercy, sobbing uncontrollably now. I ignore her and continue down the short trail toward my usual location.\nOnce there, I throw her to the ground and tie her hands with the rope I’d left ready. As I reach for the knife I had buried nearby, a sharp, burning pain stabs my side, and I lose balance.\nOn the ground, I realize I’ve been shot in the thigh. A man steps out from the shadows with a shotgun in hand and unties the girl. They embrace, and I hear him say, \"This is what Catherine would have wanted. Now she can rest in peace—you were perfect.”. The resemblance hit me like a jolt, and in that moment, I remembered—Catherine, the last girl.\nHe reloads the shotgun and steps toward me. I try to reason with him, plead for calm, explaining that it’s all a misunderstanding. But the cold steel of the barrel presses against my forehead."
+// 	sentences := splitIntoChunks(story)
+
+// 	log.Println("sentences len", len(sentences))
+
+// 	// var durations []float64
+// 	// var audioFiles []string
+// 	durations := []float64{4.046, 3.06, 4.051, 4.003, 3.055, 2.006, 5.006, 4.039, 5.054, 2.035, 5.05, 2.078, 4.03, 5.066, 4.02, 5.093, 5.062, 5.064, 3.012, 3.091, 3.01, 6.038, 3.067, 2.03, 5.086, 4.049, 7.037, 2.09, 4.054, 6.034, 4.087, 3.094, 4.039, 4.09, 5.04, 7.068, 3.079, 5.038, 5.002, 3.065, 6.058, 3.05, 5.062, 4.008}
+// 	audioFiles := []string{"data/audio_1.mp3", "data/audio_2.mp3", "data/audio_3.mp3", "data/audio_4.mp3", "data/audio_5.mp3", "data/audio_6.mp3", "data/audio_7.mp3", "data/audio_8.mp3", "data/audio_9.mp3", "data/audio_10.mp3", "data/audio_11.mp3", "data/audio_12.mp3", "data/audio_13.mp3", "data/audio_14.mp3", "data/audio_15.mp3", "data/audio_16.mp3", "data/audio_17.mp3", "data/audio_18.mp3", "data/audio_19.mp3", "data/audio_20.mp3", "data/audio_21.mp3", "data/audio_22.mp3", "data/audio_23.mp3", "data/audio_24.mp3", "data/audio_25.mp3", "data/audio_26.mp3", "data/audio_27.mp3", "data/audio_28.mp3", "data/audio_29.mp3", "data/audio_30.mp3", "data/audio_31.mp3", "data/audio_32.mp3", "data/audio_33.mp3", "data/audio_34.mp3", "data/audio_35.mp3", "data/audio_36.mp3", "data/audio_37.mp3", "data/audio_38.mp3", "data/audio_39.mp3", "data/audio_40.mp3", "data/audio_41.mp3", "data/audio_42.mp3", "data/audio_43.mp3", "data/audio_44.mp3"}
+
+// 	// for i, sentence := range sentences {
+// 	// 	filename := "data/audio_" + strconv.Itoa(i+1) + ".mp3"
+// 	// 	audioFiles = append(audioFiles, filename)
+
+// 	// 	log.Println("generating audio, filename=" + filename + ", text=" + sentence)
+
+// 	// 	_, err := GenerateAudio(sentence)
+// 	// 	if err != nil {
+// 	// 		fmt.Println("Error generating audio:", err)
+// 	// 		return
+// 	// 	}
+
+// 	// 	lastGeneratedAudio, err := GetLastGeneratedAudio()
+// 	// 	if err != nil {
+// 	// 		log.Fatal(err)
+// 	// 	}
+
+// 	// 	DownloadAudio(lastGeneratedAudio.Audio, filename)
+
+// 	// 	duration, err := getAudioDuration(filename)
+// 	// 	if err != nil {
+// 	// 		fmt.Println("Error getting audio duration:", err)
+// 	// 		return
+// 	// 	}
+// 	// 	durations = append(durations, duration)
+// 	// }
+
+// 	// log.Println("durations", durations)
+// 	// log.Println("audioFiles", audioFiles)
+
+// 	srtFile := "data/output.srt"
+// 	if err := createSRTFile(sentences, durations, srtFile); err != nil {
+// 		fmt.Println("Error creating SRT file:", err)
+// 		return
+// 	}
+
+// 	videoFile := "data/background.mp4"
+// 	outputFile := "data/final_output.mp4"
+// 	if err := stitchVideoWithAudioAndSubtitles(videoFile, audioFiles, srtFile, outputFile); err != nil {
+// 		fmt.Println("Error stitching video:", err)
+// 	} else {
+// 		fmt.Println("Video created successfully:", outputFile)
+// 	}
+// }
+
 func main() {
-	if err := config.LoadEnv(); err != nil {
-		log.Fatal("Couldn't load env vars, returning")
+	// Define paths
+	backgroundVideo := "data/background.mp4"
+	subtitleFile := "data/output.srt"
+	outputVideo := "data/final_output_" + strconv.FormatInt(time.Now().UnixMilli(), 10) + ".mp4"
+
+	// Open the subtitle file
+	file, err := os.Open(subtitleFile)
+	if err != nil {
+		fmt.Println("Error opening subtitle file:", err)
+		return
+	}
+	defer file.Close()
+
+	// Regular expression to match timestamp lines in the SRT file
+	timestampRegex := regexp.MustCompile(`([0-9]{2}):([0-9]{2}):([0-9]{2}),([0-9]{3})`)
+
+	// Prepare for input files and filter complex
+	inputFiles := []string{"-i", backgroundVideo}
+	filterComplex := ""
+	audioIndex := 1
+
+	// Read through the subtitle file and process each timestamp
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		// Match timestamp lines to get the start time
+		if matches := timestampRegex.FindStringSubmatch(line); len(matches) == 5 {
+			// Convert time to milliseconds
+			hours, _ := strconv.Atoi(matches[1])
+			minutes, _ := strconv.Atoi(matches[2])
+			seconds, _ := strconv.Atoi(matches[3])
+			milliseconds, _ := strconv.Atoi(matches[4])
+			delay := (hours*3600+minutes*60+seconds)*1000 + milliseconds
+
+			// Build the adelay filter for each audio file
+			filterComplex += fmt.Sprintf("[%d]adelay=%d|%d[a%d]; ", audioIndex, delay, delay, audioIndex)
+			inputFiles = append(inputFiles, "-i", fmt.Sprintf("data/audio_%d.mp3", audioIndex))
+			audioIndex++
+		}
 	}
 
-	story := "Nursing student. Born and raised on a farm. Twenty-eight years old. Slim. Defensive posture and a soft voice (low self-esteem). Sitting in a shitty bar at 8 PM on a Wednesday night. Physically, she looked a lot like the last one.\nShe was perfect.\nAfter some small talk and four cans of beer, her voice softens. Her cheeks flush, and I can sense the sexual tension building. I shift to the offensive, leaning closer and letting my hand brush her knee and shoulder. I wait for a reaction. It comes in the form of a shy glance and a slight openness to more physical contact.\nEverything was going according to plan. In fact, I hadn’t expected things to flow this smoothly. Two out of the last three had required more than one encounter to reach this level of intimacy.\nI invite her to leave the bar and grab a quick bite to eat. I tell her I know a great spot nearby where we can get something fast before calling it a night. I feel her hesitation for a moment, probably weighing the risks of saying yes. She mentions she has class early tomorrow, but I reassure her—it won’t take long. The place is just fifteen minutes away. Convinced, she follows me out and into my car.\nWe laugh and chat during the drive. She only realizes we’ve entered the park about ten minutes in and asks if we’re close to the destination. I assure her that we are—it’s just up ahead. I just took a shortcut.\nWe’re now deep inside the park, where the lights become sparse and then disappear completely. It’s the perfect place—one I know like the back of my hand. I had practiced this route several times to ensure everything would run smoothly and avoid any unexpected encounters. All the others ended up here too.\nI pull over at the pre-planned spot and ask her to step out of the car. Confusion spreads across her face as she senses something is wrong, and her body stiffens. I open the door and yank her out, and she collapses onto the grass.\nGrabbing her by the neck, I steer her along the path. She starts begging for mercy, sobbing uncontrollably now. I ignore her and continue down the short trail toward my usual location.\nOnce there, I throw her to the ground and tie her hands with the rope I’d left ready. As I reach for the knife I had buried nearby, a sharp, burning pain stabs my side, and I lose balance.\nOn the ground, I realize I’ve been shot in the thigh. A man steps out from the shadows with a shotgun in hand and unties the girl. They embrace, and I hear him say, \"This is what Catherine would have wanted. Now she can rest in peace—you were perfect.”. The resemblance hit me like a jolt, and in that moment, I remembered—Catherine, the last girl.\nHe reloads the shotgun and steps toward me. I try to reason with him, plead for calm, explaining that it’s all a misunderstanding. But the cold steel of the barrel presses against my forehead."
-	sentences := splitIntoChunks(story)
-
-	log.Println("sentences len", len(sentences))
-
-	var durations []float64
-	var audioFiles []string
-
-	for i, sentence := range sentences {
-		filename := "audios/audio_" + strconv.Itoa(i+1) + ".mp3"
-		audioFiles = append(audioFiles, filename)
-
-		log.Println("generating audio, filename=" + filename + ", text=" + sentence)
-
-		_, err := GenerateAudio(sentence)
-		if err != nil {
-			fmt.Println("Error generating audio:", err)
-			return
-		}
-
-		lastGeneratedAudio, err := GetLastGeneratedAudio()
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		DownloadAudio(lastGeneratedAudio.Audio, filename)
-
-		duration, err := getAudioDuration(filename)
-		if err != nil {
-			fmt.Println("Error getting audio duration:", err)
-			return
-		}
-		durations = append(durations, duration)
+	if err := scanner.Err(); err != nil {
+		fmt.Println("Error reading subtitle file:", err)
+		return
 	}
 
-	log.Println("durations", durations)
-	log.Println("audioFiles", audioFiles)
+	// Combine all audio streams using amix
+	amixInputs := ""
+	for i := 1; i < audioIndex; i++ {
+		amixInputs += fmt.Sprintf("[a%d]", i)
+	}
+	filterComplex += fmt.Sprintf("%samix=inputs=%d[audio]", amixInputs, audioIndex-1)
 
-	// srtFile := "output.srt"
-	// if err := createSRTFile(sentences, durations, srtFile); err != nil {
-	// 	fmt.Println("Error creating SRT file:", err)
-	// 	return
-	// }
+	// Updated subtitle filter with larger font size and centering
+	// Here we specify y=(h-th)/2 to vertically center the text
+	subtitleFilter := fmt.Sprintf("subtitles='%s':force_style='FontSize=24,Alignment=2'", subtitleFile)
 
-	// videoFile := "background.mp4"
-	// outputFile := "final_output.mp4"
-	// err = stitchVideoWithAudioAndSubtitles(videoFile, audioFiles, srtFile, outputFile)
-	// if err != nil {
-	// 	fmt.Println("Error stitching video:", err)
-	// } else {
-	// 	fmt.Println("Video created successfully:", outputFile)
-	// }
+	// Final ffmpeg command arguments
+	ffmpegArgs := append(inputFiles, "-filter_complex", filterComplex, "-vf", subtitleFilter, "-map", "0:v", "-map", "[audio]", "-shortest", outputVideo)
+
+	// Print the command to debug
+	fmt.Println("Running ffmpeg command:")
+	fmt.Println("ffmpeg", ffmpegArgs)
+
+	// Execute the command
+	cmd := exec.Command("ffmpeg", ffmpegArgs...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err = cmd.Run()
+	if err != nil {
+		fmt.Println("Error executing ffmpeg:", err)
+	}
 }
 
 func GenerateAudio(text string) (bool, error) {
