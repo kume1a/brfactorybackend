@@ -227,12 +227,10 @@ func stitchVideoWithAudioAndSubtitles(videoFile string, audioFiles []string, srt
 // }
 
 func main() {
-	// Define paths
 	backgroundVideo := "data/background.mp4"
 	subtitleFile := "data/output.srt"
 	outputVideo := "data/final_output_" + strconv.FormatInt(time.Now().UnixMilli(), 10) + ".mp4"
 
-	// Open the subtitle file
 	file, err := os.Open(subtitleFile)
 	if err != nil {
 		fmt.Println("Error opening subtitle file:", err)
@@ -240,29 +238,23 @@ func main() {
 	}
 	defer file.Close()
 
-	// Regular expression to match timestamp lines in the SRT file
 	timestampRegex := regexp.MustCompile(`([0-9]{2}):([0-9]{2}):([0-9]{2}),([0-9]{3})`)
 
-	// Prepare for input files and filter complex
 	inputFiles := []string{"-i", backgroundVideo}
 	filterComplex := ""
 	audioIndex := 1
 
-	// Read through the subtitle file and process each timestamp
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
 
-		// Match timestamp lines to get the start time
 		if matches := timestampRegex.FindStringSubmatch(line); len(matches) == 5 {
-			// Convert time to milliseconds
 			hours, _ := strconv.Atoi(matches[1])
 			minutes, _ := strconv.Atoi(matches[2])
 			seconds, _ := strconv.Atoi(matches[3])
 			milliseconds, _ := strconv.Atoi(matches[4])
 			delay := (hours*3600+minutes*60+seconds)*1000 + milliseconds
 
-			// Build the adelay filter for each audio file
 			filterComplex += fmt.Sprintf("[%d]adelay=%d|%d[a%d]; ", audioIndex, delay, delay, audioIndex)
 			inputFiles = append(inputFiles, "-i", fmt.Sprintf("data/audio_%d.mp3", audioIndex))
 			audioIndex++
@@ -274,31 +266,21 @@ func main() {
 		return
 	}
 
-	// Combine all audio streams using amix
 	amixInputs := ""
 	for i := 1; i < audioIndex; i++ {
 		amixInputs += fmt.Sprintf("[a%d]", i)
 	}
 	filterComplex += fmt.Sprintf("%samix=inputs=%d[audio]", amixInputs, audioIndex-1)
 
-	// Updated subtitle filter with larger font size and centering
-	// Here we specify y=(h-th)/2 to vertically center the text
-	subtitleFilter := fmt.Sprintf("subtitles='%s':force_style='FontSize=24,Alignment=6,MarginV=0'", subtitleFile)
-
-	// Resize and center crop the background video to 9:16 aspect ratio
+	subtitleFilter := fmt.Sprintf("subtitles='%s':force_style='FontSize=16,Bold=1,Alignment=10,MarginV=0,OutlineColour=&H000000&,Outline=1'", subtitleFile)
 	videoFilter := "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920"
 
-	// Combine video and subtitle filters
 	finalFilter := fmt.Sprintf("%s,%s", videoFilter, subtitleFilter)
-
-	// Final ffmpeg command arguments
 	ffmpegArgs := append(inputFiles, "-filter_complex", filterComplex, "-vf", finalFilter, "-map", "0:v", "-map", "[audio]", "-shortest", outputVideo)
 
-	// Print the command to debug
 	fmt.Println("Running ffmpeg command:")
 	fmt.Println("ffmpeg", ffmpegArgs)
 
-	// Execute the command
 	cmd := exec.Command("ffmpeg", ffmpegArgs...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
