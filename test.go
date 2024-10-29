@@ -166,8 +166,21 @@ func stitchVideoWithAudioAndSubtitles(videoFile string, audioFiles []string, srt
 	return cmd.Run()
 }
 
-func GenerateDownloadAudios(texts []string) (files []string, err error) {
+func ChangeAudioSpeed(inputPath, outputPath string, speed float64) error {
+	if speed < 0.5 || speed > 2.5 {
+		return fmt.Errorf("speed must be between 0.5 and 2.0")
+	}
 
+	cmd := exec.Command("ffmpeg", "-i", inputPath, "-filter:a", fmt.Sprintf("atempo=%f", speed), "-vn", outputPath)
+
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("failed to change audio speed: %v", err)
+	}
+
+	return nil
+}
+
+func GenerateDownloadAudios(texts []string) (files []string, err error) {
 	// for i, sentence := range sentences {
 	// 	filename := "data/audio_" + strconv.Itoa(i+1) + ".mp3"
 	// 	audioFiles = append(audioFiles, filename)
@@ -208,7 +221,40 @@ func main() {
 
 	log.Println("sentences len", len(sentences))
 
-	durations := []float64{4.046, 3.06, 4.051, 4.003, 3.055, 2.006, 5.006, 4.039, 5.054, 2.035, 5.05, 2.078, 4.03, 5.066, 4.02, 5.093, 5.062, 5.064, 3.012, 3.091, 3.01, 6.038, 3.067, 2.03, 5.086, 4.049, 7.037, 2.09, 4.054, 6.034, 4.087, 3.094, 4.039, 4.09, 5.04, 7.068, 3.079, 5.038, 5.002, 3.065, 6.058, 3.05, 5.062, 4.008}
+	durations := []float64{}
+	audioFiles := []string{
+		"data/audio_1.mp3", "data/audio_2.mp3", "data/audio_3.mp3", "data/audio_4.mp3", "data/audio_5.mp3",
+		"data/audio_6.mp3", "data/audio_7.mp3", "data/audio_8.mp3", "data/audio_9.mp3", "data/audio_10.mp3",
+		"data/audio_11.mp3", "data/audio_12.mp3", "data/audio_13.mp3", "data/audio_14.mp3", "data/audio_15.mp3",
+		"data/audio_16.mp3", "data/audio_17.mp3", "data/audio_18.mp3", "data/audio_19.mp3", "data/audio_20.mp3",
+		"data/audio_21.mp3", "data/audio_22.mp3", "data/audio_23.mp3", "data/audio_24.mp3", "data/audio_25.mp3",
+		"data/audio_26.mp3", "data/audio_27.mp3", "data/audio_28.mp3", "data/audio_29.mp3", "data/audio_30.mp3",
+		"data/audio_31.mp3", "data/audio_32.mp3", "data/audio_33.mp3", "data/audio_34.mp3", "data/audio_35.mp3",
+		"data/audio_36.mp3", "data/audio_37.mp3", "data/audio_38.mp3", "data/audio_39.mp3", "data/audio_40.mp3",
+		"data/audio_41.mp3", "data/audio_42.mp3", "data/audio_43.mp3", "data/audio_44.mp3",
+	}
+
+	for _, audioFile := range audioFiles {
+		// ext := filepath.Ext(audioFile)
+		// base := audioFile[:len(audioFile)-len(ext)]
+		// outputPath := fmt.Sprintf("%s_1_5x%s", base, ext)
+
+		// log.Println("changing audio speed", audioFile, outputPath)
+
+		// err := ChangeAudioSpeed(audioFile, outputPath, 1.5)
+		// if err != nil {
+		// 	log.Println("Error changing audio speed", err)
+		// 	return
+		// }
+
+		duration, err := getAudioDuration(audioFile)
+		if err != nil {
+			log.Println("Error getting audio duration:", err)
+			return
+		}
+
+		durations = append(durations, duration)
+	}
 
 	srtFile := "data/output.srt"
 	if err := createSRTFile(sentences, durations, srtFile); err != nil {
